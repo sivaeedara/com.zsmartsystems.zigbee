@@ -164,6 +164,7 @@ public final class ZigBeeConsole {
 
         commands.put("firmware", new FirmwareCommand());
 
+        commands.put("supportedcluster", new SupportedClusterCommand());
         commands.put("trustcentre", new TrustCentreCommand());
 
         this.networkManager = networkManager;
@@ -2720,6 +2721,50 @@ public final class ZigBeeConsole {
             });
 
             out.println("Starting dongle firmware update...");
+            return true;
+        }
+    }
+
+    /**
+     * Locks door.
+     */
+    private class SupportedClusterCommand implements ConsoleCommand {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getDescription() {
+            return "Adds a cluster to the list of supported clusters";
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getSyntax() {
+            return "supportedcluster CLUSTER";
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean process(final ZigBeeApi zigbeeApi, final String[] args, PrintStream out) throws Exception {
+            if (args.length != 2) {
+                return false;
+            }
+
+            int clusterId = 0;
+            if (args[1].startsWith("0x")) {
+                clusterId = Integer.parseInt(args[1].substring(2), 16);
+            } else {
+                clusterId = Integer.parseInt(args[1]);
+            }
+
+            networkManager.addSupportedCluster(clusterId);
+
+            print("Added cluster " + String.format("0x%X", clusterId) + " to match descriptor list.", out);
+
             return true;
         }
     }
