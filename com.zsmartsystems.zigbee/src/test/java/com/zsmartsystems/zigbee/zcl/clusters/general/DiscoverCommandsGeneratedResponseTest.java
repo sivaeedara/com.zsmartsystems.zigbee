@@ -7,9 +7,7 @@
  */
 package com.zsmartsystems.zigbee.zcl.clusters.general;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.List;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -36,8 +34,7 @@ public class DiscoverCommandsGeneratedResponseTest extends CommandTest {
 
         System.out.println(response);
 
-        List<Integer> records = response.getCommandIdentifiers();
-        assertEquals(0, records.size());
+        assertNull(response.getCommandIdentifiers());
     }
 
 }

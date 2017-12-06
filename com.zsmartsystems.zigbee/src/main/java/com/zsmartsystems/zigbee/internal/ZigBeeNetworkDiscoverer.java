@@ -8,13 +8,12 @@
 package com.zsmartsystems.zigbee.internal;
 
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,13 +21,16 @@ import org.slf4j.LoggerFactory;
 import com.zsmartsystems.zigbee.CommandResult;
 import com.zsmartsystems.zigbee.IeeeAddress;
 import com.zsmartsystems.zigbee.ZigBeeAnnounceListener;
+import com.zsmartsystems.zigbee.ZigBeeBroadcastDestination;
 import com.zsmartsystems.zigbee.ZigBeeCommand;
 import com.zsmartsystems.zigbee.ZigBeeCommandListener;
 import com.zsmartsystems.zigbee.ZigBeeEndpoint;
 import com.zsmartsystems.zigbee.ZigBeeEndpointAddress;
 import com.zsmartsystems.zigbee.ZigBeeNetworkManager;
+import com.zsmartsystems.zigbee.ZigBeeNetworkStateListener;
 import com.zsmartsystems.zigbee.ZigBeeNode;
 import com.zsmartsystems.zigbee.ZigBeeNodeStatus;
+import com.zsmartsystems.zigbee.transport.ZigBeeTransportState;
 import com.zsmartsystems.zigbee.zcl.ZclCommand;
 import com.zsmartsystems.zigbee.zdo.ZdoStatus;
 import com.zsmartsystems.zigbee.zdo.command.ActiveEndpointsRequest;
@@ -36,6 +38,8 @@ import com.zsmartsystems.zigbee.zdo.command.ActiveEndpointsResponse;
 import com.zsmartsystems.zigbee.zdo.command.DeviceAnnounce;
 import com.zsmartsystems.zigbee.zdo.command.IeeeAddressRequest;
 import com.zsmartsystems.zigbee.zdo.command.IeeeAddressResponse;
+import com.zsmartsystems.zigbee.zdo.command.NetworkAddressRequest;
+import com.zsmartsystems.zigbee.zdo.command.NetworkAddressResponse;
 import com.zsmartsystems.zigbee.zdo.command.NodeDescriptorRequest;
 import com.zsmartsystems.zigbee.zdo.command.NodeDescriptorResponse;
 import com.zsmartsystems.zigbee.zdo.command.PowerDescriptorRequest;
@@ -54,7 +58,8 @@ import com.zsmartsystems.zigbee.zdo.field.SimpleDescriptor;
  *
  * @author Chris Jackson
  */
-public class ZigBeeNetworkDiscoverer implements ZigBeeCommandListener, ZigBeeAnnounceListener {
+public class ZigBeeNetworkDiscoverer
+        implements ZigBeeCommandListener, ZigBeeAnnounceListener, ZigBeeNetworkStateListener {
     /**
      * The logger.
      */
@@ -97,20 +102,21 @@ public class ZigBeeNetworkDiscoverer implements ZigBeeCommandListener, ZigBeeAnn
     private final Set<ZigBeeEndpointAddress> discoveryProgress = new HashSet<ZigBeeEndpointAddress>();
 
     /**
-     * Executor service to execute discovery threads
+     * Flag used to initialise the discoverer once the network is ONLINE
      */
-    private static ExecutorService executorService = Executors.newFixedThreadPool(6);
+    private boolean initialized = false;
 
     private enum NodeDiscoveryState {
+        NWK_ADDRESS,
         IEEE_ADDRESS,
         NODE_DESCRIPTOR,
         POWER_DESCRIPTOR,
-        ACTIVE_ENDPOINTS;
-
-        public NodeDiscoveryState next() {
-            return values()[(this.ordinal() + 1) % values().length];
-        }
+        ACTIVE_ENDPOINTS,
+        DISCOVERY_END;
     }
+
+    private final Map<NodeDiscoveryState, NodeDiscoveryState> discoveryFlow = new EnumMap<NodeDiscoveryState, NodeDiscoveryState>(
+            NodeDiscoveryState.class);
 
     /**
      * Discovers ZigBee network state.
@@ -119,17 +125,18 @@ public class ZigBeeNetworkDiscoverer implements ZigBeeCommandListener, ZigBeeAnn
      */
     public ZigBeeNetworkDiscoverer(final ZigBeeNetworkManager networkManager) {
         this.networkManager = networkManager;
+
+        discoveryFlow.put(NodeDiscoveryState.IEEE_ADDRESS, NodeDiscoveryState.NODE_DESCRIPTOR);
+        discoveryFlow.put(NodeDiscoveryState.NODE_DESCRIPTOR, NodeDiscoveryState.POWER_DESCRIPTOR);
+        discoveryFlow.put(NodeDiscoveryState.POWER_DESCRIPTOR, NodeDiscoveryState.ACTIVE_ENDPOINTS);
+        discoveryFlow.put(NodeDiscoveryState.ACTIVE_ENDPOINTS, NodeDiscoveryState.DISCOVERY_END);
     }
 
     /**
-     * Starts up ZigBee network discoverer.
+     * Starts up ZigBee network discoverer. This adds a listener to wait for the network to go online.
      */
     public void startup() {
-        networkManager.addCommandListener(this);
-        networkManager.addAnnounceListener(this);
-
-        // Start discovery from root node.
-        startNodeDiscovery(0);
+        networkManager.addNetworkStateListener(this);
     }
 
     /**
@@ -175,6 +182,58 @@ public class ZigBeeNetworkDiscoverer implements ZigBeeCommandListener, ZigBeeAnn
     }
 
     /**
+     * Starts a discovery on a node.
+     *
+     * @param nodeAddress the network address of the node to discover
+     */
+    public void rediscoverNode(final int nodeAddress) {
+        startNodeDiscovery(nodeAddress);
+    }
+
+    /**
+     * Starts a discovery on a node. This will send a {@link NetworkAddressRequest} as a broadcast and will receive
+     * the response to trigger a full discovery.
+     *
+     * @param ieeeAddress the {@link IeeeAddress} of the node to discover
+     */
+    public void rediscoverNode(final IeeeAddress ieeeAddress) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                logger.debug("Starting node rediscovery of {}", ieeeAddress);
+                int retries = 0;
+                try {
+                    do {
+                        if (Thread.currentThread().isInterrupted()) {
+                            break;
+                        }
+
+                        NetworkAddressRequest request = new NetworkAddressRequest();
+                        request.setIeeeAddr(ieeeAddress);
+                        request.setRequestType(0);
+                        request.setStartIndex(0);
+                        request.setDestinationAddress(
+                                new ZigBeeEndpointAddress(ZigBeeBroadcastDestination.BROADCAST_RX_ON.getKey()));
+                        CommandResult response;
+                        response = networkManager.unicast(request, request).get();
+
+                        final NetworkAddressResponse nwkAddressResponse = response.getResponse();
+                        if (nwkAddressResponse != null && nwkAddressResponse.getStatus() == ZdoStatus.SUCCESS) {
+                            startNodeDiscovery(nwkAddressResponse.getNwkAddrRemoteDev());
+                            break;
+                        }
+                    } while (retries++ < RETRY_COUNT);
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.debug("Error in rediscoverNode", e);
+                }
+                logger.debug("Finishing node rediscovery of {}", ieeeAddress);
+            }
+        };
+
+        networkManager.executeTask(runnable);
+    }
+
+    /**
      * Performs the top level node discovery. This discovers node level attributes such as the endpoints and
      * descriptors.
      *
@@ -204,6 +263,10 @@ public class ZigBeeNetworkDiscoverer implements ZigBeeCommandListener, ZigBeeAnn
                 boolean success;
                 NodeDiscoveryState discoveryState = NodeDiscoveryState.IEEE_ADDRESS;
                 do {
+                    if (Thread.currentThread().isInterrupted()) {
+                        break;
+                    }
+
                     success = false;
                     switch (discoveryState) {
                         case IEEE_ADDRESS:
@@ -225,8 +288,12 @@ public class ZigBeeNetworkDiscoverer implements ZigBeeCommandListener, ZigBeeAnn
 
                     if (success) {
                         logger.debug("{}: Discovery request {} successfull. Advanced to {}.", nodeNetworkAddress,
-                                discoveryState, discoveryState.next());
-                        discoveryState = discoveryState.next();
+                                discoveryState, discoveryFlow.get(discoveryState));
+                        discoveryState = discoveryFlow.get(discoveryState);
+                        if (discoveryState == NodeDiscoveryState.DISCOVERY_END) {
+                            break;
+                        }
+
                         continue;
                     }
 
@@ -238,14 +305,13 @@ public class ZigBeeNetworkDiscoverer implements ZigBeeCommandListener, ZigBeeAnn
                     } catch (InterruptedException e) {
                         return;
                     }
-
                 } while (retries++ < RETRY_COUNT);
 
                 logger.debug("{}: Ending node discovery", nodeNetworkAddress);
             }
         };
 
-        executorService.execute(new Thread(runnable, "Discovery-Node-" + nodeNetworkAddress));
+        networkManager.executeTask(runnable);
     }
 
     /**
@@ -271,6 +337,10 @@ public class ZigBeeNetworkDiscoverer implements ZigBeeCommandListener, ZigBeeAnn
                 logger.debug("{}: Starting device discovery", deviceNetworkAddress);
                 int retries = 0;
                 while (!getSimpleDescriptor(deviceNetworkAddress)) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        break;
+                    }
+
                     if (retries++ > RETRY_COUNT) {
                         break;
                     }
@@ -283,7 +353,7 @@ public class ZigBeeNetworkDiscoverer implements ZigBeeCommandListener, ZigBeeAnn
             }
         };
 
-        executorService.execute(new Thread(runnable, "Discovery-Device-" + deviceNetworkAddress));
+        networkManager.executeTask(runnable);
     }
 
     /**
@@ -436,6 +506,9 @@ public class ZigBeeNetworkDiscoverer implements ZigBeeCommandListener, ZigBeeAnn
                             new ZigBeeEndpointAddress(activeEndpointsResponse.getNwkAddrOfInterest(), endpoint));
                 }
 
+                // Call updateNode in case there are no endpoints in this node
+                updateNode(node);
+
                 return true;
             } else {
                 logger.debug("Active Endpoints for {} returned {}", networkAddress, activeEndpointsResponse);
@@ -512,10 +585,21 @@ public class ZigBeeNetworkDiscoverer implements ZigBeeCommandListener, ZigBeeAnn
         synchronized (discoveryProgress) {
             // Remove this device from the progress list
             discoveryProgress.remove(deviceAddress);
+        }
+        updateNode(node);
+    }
 
+    /**
+     * Updates {@link ZigBeeNode} and completes discovery if all devices are discovered in
+     * this node.
+     *
+     * @param node the {@link ZigBeeNode} to add
+     */
+    private void updateNode(final ZigBeeNode node) {
+        synchronized (discoveryProgress) {
             // Check the progress list to see if there are still devices to be discovered on this node
             for (ZigBeeEndpointAddress address : discoveryProgress) {
-                if (address.getAddress() == deviceAddress.getAddress()) {
+                if (address.getAddress() == node.getNetworkAddress()) {
                     return;
                 }
             }
@@ -525,6 +609,19 @@ public class ZigBeeNetworkDiscoverer implements ZigBeeCommandListener, ZigBeeAnn
         networkManager.addNode(node);
 
         // Remove the node from the discovery list
-        discoveryNodes.remove(deviceAddress.getAddress());
+        discoveryNodes.remove(node.getNetworkAddress());
+    }
+
+    @Override
+    public void networkStateUpdated(ZigBeeTransportState state) {
+        if (state == ZigBeeTransportState.ONLINE && !initialized) {
+            initialized = true;
+
+            networkManager.addCommandListener(this);
+            networkManager.addAnnounceListener(this);
+
+            // Start discovery from root node.
+            startNodeDiscovery(0);
+        }
     }
 }

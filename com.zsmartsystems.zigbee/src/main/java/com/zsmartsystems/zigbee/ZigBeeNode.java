@@ -65,12 +65,12 @@ public class ZigBeeNode implements ZigBeeCommandListener {
     /**
      * The {@link NodeDescriptor} for the node
      */
-    private NodeDescriptor nodeDescriptor;
+    private NodeDescriptor nodeDescriptor = new NodeDescriptor();
 
     /**
      * The {@link PowerDescriptor} for the node
      */
-    private PowerDescriptor powerDescriptor;
+    private PowerDescriptor powerDescriptor = new PowerDescriptor();
 
     /**
      * A flag indicating if this node is configured to allow joining
@@ -332,8 +332,11 @@ public class ZigBeeNode implements ZigBeeCommandListener {
     }
 
     /**
-     * Request an update of the binding table for this node
-     * TODO: This needs to handle the response and further requests if required to complete the table
+     * Request an update of the binding table for this node.
+     * <p>
+     * This method returns a future to a boolean. Upon success the caller should call {@link #getBindingTable()}
+     *
+     * @return {@link Future} returning a {@link Boolean}
      */
     public Future<Boolean> updateBindingTable() {
         RunnableFuture<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
@@ -482,7 +485,9 @@ public class ZigBeeNode implements ZigBeeCommandListener {
      * @return current list of neighbors as a {@link NeighborTable}
      */
     public List<NeighborTable> getNeighbors() {
-        return neighbors;
+        synchronized (neighbors) {
+            return new ArrayList<NeighborTable>(neighbors);
+        }
     }
 
     /**
@@ -531,7 +536,9 @@ public class ZigBeeNode implements ZigBeeCommandListener {
      * @return current list of associated devices as a {@link List} of {@link Integer}
      */
     public List<Integer> getAssociatedDevices() {
-        return associatedDevices;
+        synchronized (associatedDevices) {
+            return new ArrayList<Integer>(associatedDevices);
+        }
     }
 
     /**
@@ -580,7 +587,9 @@ public class ZigBeeNode implements ZigBeeCommandListener {
      * @return list of routes as a {@link RoutingTable}
      */
     public List<RoutingTable> getRoutes() {
-        return routes;
+        synchronized (routes) {
+            return new ArrayList<RoutingTable>(routes);
+        }
     }
 
     /**
