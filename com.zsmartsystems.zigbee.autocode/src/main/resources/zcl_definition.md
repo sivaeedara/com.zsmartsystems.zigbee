@@ -409,6 +409,10 @@ unauthorised persons in a public building.
 ### Received
 
 #### Reset to Factory Defaults Command [0x00]
+On receipt of this command, the device resets all the attributes of all its clusters
+to their factory defaults. Note that ZigBee networking functionality,bindings, groups
+or other persistent data are not affected by this command
+
 |Field Name                 |Data Type                  |
 |---------------------------|---------------------------|
 
@@ -431,13 +435,22 @@ and for configuring under/over voltage alarms.
 |0x0012 |MainsVoltageMaxThreshold  |Unsigned 16-bit integer    |Read/Write |Optional  |          |
 |0x0013 |MainsVoltageDwellTripPoint|Unsigned 16-bit integer    |Read/Write |Optional  |          |
 |0x0020 |BatteryVoltage            |Unsigned 8-bit integer     |Read       |Optional  |          |
-|0x0030 |BatteryManufacturer       |Character string           |Read/Write |Optional  |          |
-|0x0031 |BatterySize               |8-bit Enumeration          |Read/Write |Optional  |          |
-|0x0032 |BatteryAHrRating          |Unsigned 16-bit integer    |Read/Write |Optional  |          |
-|0x0033 |BatteryQuantity           |Unsigned 8-bit integer     |Read/Write |Optional  |          |
-|0x0034 |BatteryRatedVoltage       |Unsigned 8-bit integer     |Read/Write |Optional  |          |
-|0x0035 |BatteryAlarmMask          |8-bit Bitmap               |Read/Write |Optional  |          |
-|0x0036 |BatteryVoltageMinThreshold|Unsigned 8-bit integer     |Read/Write |Optional  |          |
+|0x0021 |BatteryPercentageRemaining   |Unsigned 8-bit integer     |Read       |Optional  |Mandatory |
+|0x0030 |BatteryManufacturer          |Character string           |Read/Write |Optional  |          |
+|0x0031 |BatterySize                  |8-bit Enumeration          |Read/Write |Optional  |          |
+|0x0032 |BatteryAHrRating             |Unsigned 16-bit integer    |Read/Write |Optional  |          |
+|0x0033 |BatteryQuantity              |Unsigned 8-bit integer     |Read/Write |Optional  |          |
+|0x0034 |BatteryRatedVoltage          |Unsigned 8-bit integer     |Read/Write |Optional  |          |
+|0x0035 |BatteryAlarmMask             |8-bit Bitmap               |Read/Write |Optional  |          |
+|0x0036 |BatteryVoltageMinThreshold   |Unsigned 8-bit integer     |Read/Write |Optional  |          |
+|0x0037 |BatteryVoltageThreshold1     |Unsigned 8-bit integer     |Read/Write |Optional  |          |
+|0x0038 |BatteryVoltageThreshold2     |Unsigned 8-bit integer     |Read/Write |Optional  |          |
+|0x0039 |BatteryVoltageThreshold3     |Unsigned 8-bit integer     |Read/Write |Optional  |          |
+|0x003A |BatteryPercentageMinThreshold|Unsigned 8-bit integer     |Read/Write |Optional  |          |
+|0x003B |BatteryPercentageThreshold1  |Unsigned 8-bit integer     |Read/Write |Optional  |          |
+|0x003C |BatteryPercentageThreshold2  |Unsigned 8-bit integer     |Read/Write |Optional  |          |
+|0x003D |BatteryPercentageThreshold3  |Unsigned 8-bit integer     |Read/Write |Optional  |          |
+|0x003E |BatteryAlarmState            |32-bit Bitmap              |Read       |Optional  |          |
 
 
 
@@ -518,6 +531,20 @@ specifies the name of the battery manufacturer as a ZigBee character string.
 #### BatterySize Attribute
 The BatterySize attribute is an enumeration which specifies the type of battery
 being used by the device.
+
+|Id     |Name                      |
+|-------|--------------------------|
+|0x0000 |No Battery                |
+|0x0001 |Build In                  |
+|0x0002 |Other                     |
+|0x0003 |AA  Cell                  |
+|0x0004 |AAA Cell                  |
+|0x0005 |C Cell                    |
+|0x0006 |D Cell                    |
+|0x0007 |CR2 Cell                  |
+|0x0008 |CR123A Cell               |
+|0x00FF |Unknown                   |
+
 
 #### BatteryAHrRating Attribute
 The BatteryAHrRating attribute is 16-bits in length and specifies the Ampere-hour
@@ -870,6 +897,11 @@ Attributes and commands for switching devices between ‘On’ and ‘Off’ sta
 |Id     |Name                 |Type                       |Access     |Implement |Reporting |
 |-------|---------------------|---------------------------|-----------|----------|----------|
 |0x0000 |OnOff                |Boolean                    |Read Only  |Mandatory |Mandatory |
+|0x4000 |GlobalSceneControl   |Boolean                    |Read/Write |          |Mandatory |
+|0x4001 |OffTime              |Unsigned 16-bit integer    |Read/Write |          |Mandatory |
+|0x4002 |OffWaitTime          |Unsigned 16-bit integer    |Read/Write |          |Mandatory |
+
+
 
 #### OnOff Attribute
 The OnOff attribute has the following values: 0 = Off, 1 = On
@@ -894,6 +926,34 @@ No cluster specific commands.
 
 ## On/off Switch Configuration [0x0007]
 Attributes and commands for configuring On/Off switching devices
+
+### Attributes
+
+|Id     |Name                 |Type                       |Access     |Implement |Reporting |
+|-------|---------------------|---------------------------|-----------|----------|----------|
+|0x0000 |SwitchType           |8-bit enumeration          |Read Only  |Mandatory |          |
+|0x0010 |SwitchActions        |8-bit enumeration          |Read Write |Mandatory |          |
+
+#### SwitchType Attribute
+The SwitchTypeattribute  specifies  the  basic  functionality  of  the  On/Off  switching  device.
+
+|Id     |Name                      |
+|-------|--------------------------|
+|0x0000 |Toggle                    |
+|0x0001 |Momentary                 |
+|0x0002 |Multifunction             |
+
+#### SwitchActions Attribute
+
+The SwitchActions attribute is 8 bits in length and specifies the commands of the On/Off cluster
+to be generated when the switch moves between its two states
+
+|Id     |Name                      |
+|-------|--------------------------|
+|0x0000 |On                        |
+|0x0001 |Off                       |
+|0x0002 |Toggle                    |
+
 
 ### Received
 
@@ -1072,12 +1132,24 @@ If alarm logging is not implemented this attribute shall always take the value
 ### Generated
 
 #### Alarm Command [0x00]
+The alarm command signals an alarm situation on the sending device.
+
+An alarm command is generated when a  cluster  which has alarm functionality detects an alarm
+condition, e.g., an attribute has taken on a value that is outside a ‘safe’ range. The details
+are given by individual cluster specifications.
+
 |Field Name                 |Data Type                  |
 |---------------------------|---------------------------|
 |Alarm code                 |8-bit enumeration          |
 |Cluster identifier         |Unsigned 16-bit integer    |
 
 #### Get Alarm Response Command [0x01]
+If there is at least one alarm record in the alarm table then the status field is set to SUCCESS.
+The alarm code, cluster identifier and time stamp fields SHALL all be present and SHALL take their
+values from the item in the alarm table that they are reporting.If there  are  no more  alarms logged
+in the  alarm table  then the  status field is set  to NOT_FOUND  and the alarm code, cluster
+identifier and time stamp fields SHALL be omitted.
+
 |Field Name                 |Data Type                  |
 |---------------------------|---------------------------|
 |Status                     |8-bit enumeration          |
@@ -1718,14 +1790,13 @@ ii) generate new log record at the time of request and send Get Relay Status Log
 
 #### Get Weekly Schedule Response [0x00]
 
-|Field Name                 |Data Type                  |
-|---------------------------|---------------------------|
-|Number of Transitions      |8-bit Enumeration          |
+|Number of Transitions      |Enumeration 8-bit          |
 |Day of Week                |Enumeration 8-bit          |
 |Mode                       |Enumeration 8-bit          |
 |Transition                 |Unsigned 16-bit integer    |
 |Heat Set                   |Unsigned 16-bit integer    |
 |Cool Set                   |Unsigned 16-bit integer    |
+
 
 #### Get Relay Status Log Response [0x01]
 
@@ -1778,17 +1849,27 @@ specification CIE 1931 Color Space, [B4]. Color control is carried out in terms 
 x,y values, as defined by this specification. 
 
 ### Attributes
-|Id     |Name                  |Type                       |Access     |Implement |Reporting |
-|-------|----------------------|---------------------------|-----------|----------|----------|
-|0x0000 |CurrentHue            |Unsigned 8-bit Integer     |Read only  |Optional  |Mandatory |
-|0x0001 |CurrentSaturation     |Unsigned 8-bit Integer     |Read only  |Optional  |Mandatory |
-|0x0002 |RemainingTime         |Unsigned 16-bit Integer    |Read only  |Optional  |          |
-|0x0003 |CurrentX              |Unsigned 16-bit Integer    |Read only  |Mandatory |Mandatory |
-|0x0004 |CurrentY              |Unsigned 16-bit Integer    |Read only  |Mandatory |Mandatory |
-|0x0005 |DriftCompensation     |8-bit Enumeration          |Read only  |Optional  |          |
-|0x0006 |CompensationText      |Character string           |Read only  |Optional  |          |
-|0x0007 |ColorTemperature      |Unsigned 16-bit Integer    |Read only  |Optional  |Mandatory |
-|0x0008 |ColorMode             |8-bit Enumeration          |Read only  |Optional  |          |
+|Id     |Name                       |Type                       |Access     |Implement |Reporting |
+|-------|---------------------------|---------------------------|-----------|----------|----------|
+|0x0000 |CurrentHue                 |Unsigned 8-bit Integer     |Read only  |Optional  |Mandatory |
+|0x0001 |CurrentSaturation          |Unsigned 8-bit Integer     |Read only  |Optional  |Mandatory |
+|0x0002 |RemainingTime              |Unsigned 16-bit Integer    |Read only  |Optional  |          |
+|0x0003 |CurrentX                   |Unsigned 16-bit Integer    |Read only  |Mandatory |Mandatory |
+|0x0004 |CurrentY                   |Unsigned 16-bit Integer    |Read only  |Mandatory |Mandatory |
+|0x0005 |DriftCompensation          |8-bit Enumeration          |Read only  |Optional  |          |
+|0x0006 |CompensationText           |Character string           |Read only  |Optional  |          |
+|0x0007 |ColorTemperature           |Unsigned 16-bit Integer    |Read only  |Optional  |Mandatory |
+|0x0008 |ColorMode                  |8-bit Enumeration          |Read only  |Optional  |          |
+|0x4000 |EnhancedCurrentHue         |Unsigned 16-bit Integer    |Read only  |Optional  |Mandatory |
+|0x4001 |EnhancedColorMode          |8-bit Enumeration          |Read only  |Optional  |          |
+|0x4002 |ColorLoopActive            |Unsigned 8-bit Integer     |Read only  |Optional  |          |
+|0x4003 |ColorLoopDirection         |Unsigned 8-bit Integer     |Read only  |Optional  |          |
+|0x4004 |ColorLoopTime              |Unsigned 16-bit Integer    |Read only  |Optional  |          |
+|0x4005 |ColorLoopStartHue          |Unsigned 16-bit Integer    |Read only  |Optional  |          |
+|0x4006 |ColorLoopStoredHue         |Unsigned 16-bit Integer    |Read only  |Optional  |          |
+|0x400A |ColorCapabilities          |16-bit Bitmap              |Read only  |Optional  |          |
+|0x400B |ColorTemperatureMin        |Unsigned 16-bit Integer    |Read only  |Optional  |          |
+|0x400C |ColorTemperatureMax        |Unsigned 16-bit Integer    |Read only  |Optional  |          |
 
 
 #### CurrentHue Attribute
@@ -1861,9 +1942,81 @@ If either the CurrentHue or CurrentSaturation attribute is implemented, this att
 implemented, otherwise it is optional. The value of the ColorMode attribute cannot be written directly
 - it is set upon reception of another command in to the appropriate mode for that command.
 
-0x00 CurrentHue and CurrentSaturation
-0x01 CurrentX and CurrentY
-0x02 ColorTemperatureMireds
+|Id     |Name                              |
+|-------|----------------------------------|
+|0x0000 |CurrentHue and CurrentSaturation  |
+|0x0001 |CurrentX and CurrentY             |
+|0x0002 |ColorTemperature                  |
+
+
+#### EnhancedCurrentHue Attribute
+The EnhancedCurrentHueattribute represents non-equidistant steps along the CIE 1931 color
+triangle, and it provides 16-bits precision. The upper 8 bits of this attribute SHALL be
+used as an index in the implementation specific XY lookup table to provide the non-equidistance
+steps (see the ZLL test specification for an example).  The lower 8 bits SHALL be used to
+interpolate between these steps in a linear way in order to provide color zoom for the user.
+
+#### EnhancedColorMode Attribute
+The EnhancedColorModeattribute specifies which attributes are currently determining the color of the device.
+To provide compatibility with standard ZCL, the original ColorModeattribute SHALLindicate ‘CurrentHueand CurrentSaturation’
+when the light uses the EnhancedCurrentHueattribute.
+ 
+|Id     |Name                                     |
+|-------|-----------------------------------------|
+|0x0000 |CurrentHue and CurrentSaturation         |
+|0x0001 |CurrentX and CurrentY                    |
+|0x0002 |ColorTemperature                         |
+|0x0002 |EnhancedCurrentHue and CurrentSaturation |
+
+#### ColorCapabilities Attribute
+The ColorCapabilitiesattribute specifies the color capabilities of the device supporting the
+color control cluster.
+
+Note:The support of the CurrentXand CurrentYattributes is mandatory regardless of color capabilities.
+
+|Id     |Name                |
+|-------|--------------------|
+|0x0001 |Hue and Saturation  |
+|0x0002 |Enhanced Hue        |
+|0x0004 |Color Loop          |
+|0x0008 |XY Attribute        |
+|0x0010 |Color Temperature   |
+
+#### ColorLoopActive Attribute
+The ColorLoopActive attribute specifies the current active status of the color loop.
+If this attribute has the value 0x00, the color loop SHALLnot be active. If this attribute
+has the value 0x01, the color loop SHALL be active. All other values (0x02 – 0xff) are reserved.
+
+#### ColorLoopDirection Attribute
+The ColorLoopDirection attribute specifies the current direction of the color loop.
+If this attribute has the value 0x00, the EnhancedCurrentHue attribute SHALL be decremented.
+If this attribute has the value 0x01, the EnhancedCurrentHue attribute SHALL be incremented.
+All other values (0x02 – 0xff) are reserved.
+
+#### ColorLoopTime Attribute
+The ColorLoopTime attribute specifies the number of seconds it SHALL take to perform a full
+color loop, i.e.,to cycle all values of the EnhancedCurrentHue attribute (between 0x0000 and 0xffff).
+
+#### ColorLoopStartHue Attribute
+The ColorLoopStartEnhancedHueattribute specifies the value of the EnhancedCurrentHue attribute
+from which the color loop SHALL be started.
+
+#### ColorLoopStoredHue Attribute
+The ColorLoopStoredEnhancedHue attribute specifies the value of the EnhancedCurrentHue attribute
+before the color loop was started. Once the color loop is complete, the EnhancedCurrentHue
+attribute SHALL be restored to this value.
+
+#### ColorTemperatureMin Attribute
+The ColorTempPhysicalMinMiredsattribute indicates the minimum mired value
+supported by the hardware. ColorTempPhysicalMinMiredscorresponds to the maximum
+color temperature in kelvins supported by the hardware.
+ColorTempPhysicalMinMireds ≤ ColorTemperatureMireds
+
+#### ColorTemperatureMax Attribute
+The ColorTempPhysicalMaxMiredsattribute indicates the maximum mired value
+supported by the hard-ware. ColorTempPhysicalMaxMiredscorresponds to the minimum
+color temperature in kelvins supported by the hardware.
+ColorTemperatureMireds ≤ ColorTempPhysicalMaxMireds.
 
 ### Received
 
@@ -1938,6 +2091,37 @@ implemented, otherwise it is optional. The value of the ColorMode attribute cann
 |---------------------------|---------------------------|
 |Color Temperature          |Unsigned 16-bit integer    |
 |Transition time            |Unsigned 16-bit integer    |
+
+#### Enhanced Move To Hue Command [0x40]
+|Field Name                 |Data Type                  |
+|---------------------------|---------------------------|
+|Hue                        |Unsigned 16-bit integer    |
+|Direction                  |8-bit enumeration          |
+|Transition time            |Unsigned 16-bit integer    |
+
+#### Enhanced Step Hue Command [0x41]
+|Field Name                 |Data Type                  |
+|---------------------------|---------------------------|
+|Step Mode                  |8-bit enumeration          |
+|Step Size                  |Unsigned 16-bit integer    |
+|Transition time            |Unsigned 16-bit integer    |
+
+#### Enhanced Move To Hue and Saturation Command [0x42]
+|Field Name                 |Data Type                  |
+|---------------------------|---------------------------|
+|Hue                        |Unsigned 16-bit integer    |
+|Saturation                 |8-bit enumeration          |
+|Transition time            |Unsigned 16-bit integer    |
+
+#### Color Loop Set Command [0x43]
+|Field Name                 |Data Type                  |
+|---------------------------|---------------------------|
+|Update Flags               |8-bit bitmap               |
+|Action                     |8-bit enumeration          |
+|Direction                  |8-bit enumeration          |
+|Transition time            |Unsigned 16-bit integer    |
+|Start Hue                  |Unsigned 16-bit integer    |
+
 
 ### Generated
 
@@ -2057,9 +2241,9 @@ No cluster specific commands.
 ### Attributes
 |Id     |Name                  |Type                       |Access     |Implement |Reporting |
 |-------|----------------------|---------------------------|-----------|----------|----------|
-|0x0000 |MeasuredValue         |Unsigned 16-bit Integer    |Read only  |Mandatory |Mandatory |
-|0x0001 |MinMeasuredValue      |Unsigned 16-bit Integer    |Read only  |Mandatory |          |
-|0x0002 |MaxMeasuredValue      |Unsigned 16-bit Integer    |Read only  |Mandatory |          |
+|0x0000 |MeasuredValue         |Signed 16-bit Integer      |Read only  |Mandatory |Mandatory |
+|0x0001 |MinMeasuredValue      |Signed 16-bit Integer      |Read only  |Mandatory |          |
+|0x0002 |MaxMeasuredValue      |Signed 16-bit Integer      |Read only  |Mandatory |          |
 |0x0003 |Tolerance             |Unsigned 16-bit Integer    |Read only  |Optional  |Mandatory |
 
 #### MeasuredValue Attribute
@@ -2111,13 +2295,13 @@ including configuration and provision of notifications of pressure measurements.
 ### Attributes
 |Id     |Name                  |Type                       |Access     |Implement |Reporting |
 |-------|----------------------|---------------------------|-----------|----------|----------|
-|0x0000 |MeasuredValue         |Unsigned 16-bit Integer    |Read only  |Mandatory |Mandatory |
-|0x0001 |MinMeasuredValue      |Unsigned 16-bit Integer    |Read only  |Mandatory |          |
-|0x0002 |MaxMeasuredValue      |Unsigned 16-bit Integer    |Read only  |Mandatory |Mandatory |
+|0x0000 |MeasuredValue         |Signed 16-bit Integer      |Read only  |Mandatory |Mandatory |
+|0x0001 |MinMeasuredValue      |Signed 16-bit Integer      |Read only  |Mandatory |          |
+|0x0002 |MaxMeasuredValue      |Signed 16-bit Integer      |Read only  |Mandatory |Mandatory |
 |0x0003 |Tolerance             |Unsigned 16-bit Integer    |Read only  |Optional  |          |
-|0x0010 |ScaledValue           |Unsigned 16-bit Integer    |Read only  |Optional  |Mandatory |
-|0x0011 |MinScaledValue        |Unsigned 16-bit Integer    |Read only  |Optional  |          |
-|0x0012 |MaxScaledValue        |Unsigned 16-bit Integer    |Read only  |Optional  |          |
+|0x0010 |ScaledValue           |Signed 16-bit Integer      |Read only  |Optional  |Mandatory |
+|0x0011 |MinScaledValue        |Signed 16-bit Integer      |Read only  |Optional  |          |
+|0x0012 |MaxScaledValue        |Signed 16-bit Integer      |Read only  |Optional  |          |
 |0x0013 |ScaledTolerance       |Unsigned 16-bit Integer    |Read only  |Optional  |Mandatory |
 |0x0014 |Scale                 |Unsigned 8-bit Integer     |Read only  |Optional  |          |
 
@@ -2343,6 +2527,12 @@ reports and supervision of the IAS network.
 |0x0013 |CurrentZoneSensitivityLevel                 |Unsigned 8-bit Integer     |Read/Write |Optional  |          |
 
 #### ZoneState Attribute
+The Zone State attribute defines if the device is currently enrolled with a CIE or not.
+
+|Id     |Name                      |
+|-------|--------------------------|
+|0x0000 |Not Enrolled              |
+|0x0001 |Enrolled                  |
 
 #### ZoneType Attribute
 The Zone Type dictates the meaning of Alarm1 and Alarm2 bits of the ZoneStatus attribute 
@@ -2365,7 +2555,7 @@ The Zone Type dictates the meaning of Alarm1 and Alarm2 bits of the ZoneStatus a
 |0x0229 |Security Repeater         |
 
 #### ZoneStatus Attribute
-The ZoneStatus attribute is a bit map.
+The ZoneStatus attribute is a bit map. Each bit defines the state of an alarm.
 
 #### IASCIEAddress Attribute
 The IAS_CIE_Address attribute specifies the address that commands generated by
@@ -2386,6 +2576,16 @@ intervention of a CT in order to configure this attribute during installation.
 |Enroll response code       |8-bit Enumeration          |
 |Zone ID                    |Unsigned 8-bit Integer     |
 
+##### Enroll response code
+
+|Id     |Name                      |
+|-------|--------------------------|
+|0x0000 |Success                   |
+|0x0001 |Not Supported             |
+|0x0002 |No Enroll Permit          |
+|0x0003 |Too Many Zones            |
+
+
 ### Generated
 
 #### Zone Status Change Notification Command [0x00]
@@ -2395,6 +2595,10 @@ intervention of a CT in order to configure this attribute during installation.
 |Extended Status            |8-bit Enumeration          |
 
 #### Zone Enroll Request Command [0x01]
+The Zone Enroll Request command is generated when a device embodying the Zone server cluster wishes
+to be  enrolled as an active  alarm device. It  must do this immediately it has joined the network
+(during commissioning).
+
 |Field Name                 |Data Type                  |
 |---------------------------|---------------------------|
 |Zone Type                  |16-bit Enumeration         |
@@ -2623,6 +2827,105 @@ command that is still current.
 ### Generated
 
 ## Electrical Measurement [0x0B04]
+This cluster provides a mechanism for querying data about the electrical properties as measured
+by the device. This cluster may be implemented on any device type and be implemented on a per-endpoint
+basis. For example, a power  strip device could represent each outlet on a  different endpoint and
+report electrical  information for each individual outlet. The only caveat is that if you implement
+an attribute that has an associated multiplier and divisor, then you must implement the associated
+multiplier and divisor attributes. For example if you implement DCVoltage, you must also implement
+DCVoltageMultiplier and DCVoltageDivisor.
+
+If you are interested in reading information about the power supply or battery level on the device,
+please see the Power Configuration cluster.
+
+### Attributes
+
+|Id     |Name                             |Type                       |Access     |Implement |Reporting |
+|-------|---------------------------------|---------------------------|-----------|----------|----------|
+|0x0000 |MeasurementType                  |32-bit Bitmap              |Read only  |Mandatory |          |
+|0x0300 |ACFrequency                      |Unsigned 16-bit Integer    |Read only  |Optional  |          |
+|0x0304 |TotalActivePower                 |Signed 32-bit Integer      |Read only  |Optional  |          |
+|0x0305 |TotalReactivePower               |Signed 32-bit Integer      |Read only  |Optional  |          |
+|0x0306 |TotalApparentPower               |Unsigned 32-bit Integer    |Read only  |Optional  |          |
+|0x0505 |RMSVoltage                       |Unsigned 16-bit Integer    |Read only  |Optional  |          |
+|0x0508 |RMSCurrent                       |Unsigned 16-bit Integer    |Read only  |Optional  |          |
+|0x050B |ActivePower                      |Signed 16-bit Integer      |Read only  |Optional  |          |
+|0x0602 |ACCurrentMultiplier              |Unsigned 16-bit Integer    |Read only  |Optional  |          |
+|0x0603 |ACCurrentDivisor                 |Unsigned 16-bit Integer    |Read only  |Optional  |          |
+|0x0604 |ACPowerMultiplier                |Unsigned 16-bit Integer    |Read only  |Optional  |          |
+|0x0605 |ACPowerDivisor                   |Unsigned 16-bit Integer    |Read only  |Optional  |          |
+
+
+
+#### MeasurementType Attribute
+This attribute indicates a device’s measurement capabilities. This will be indicated by setting
+the desire measurement bits to 1.
+
+|Id     |Name                      |
+|-------|--------------------------|
+|0x0000 |AC Active Measurement     |
+|0x0001 |AC Reactive Measurement   |
+|0x0002 |AC Apparent Measurement   |
+|0x0004 |Phase A Measurement       |
+|0x0008 |Phase B Measurement       |
+|0x0010 |Phase C Measurement       |
+|0x0020 |DC Measurement            |
+|0x0040 |Harmonics Measurement     |
+|0x0080 |Power Quality Measurement |
+
+####  ACFrequency Attribute
+The ACFrequency attribute represents the most recent AC Frequency reading in Hertz (Hz).
+If the frequency cannot be measured, a value of 0xFFFF is returned. 
+
+#### TotalActivePower Attribute
+Active power represents the current demand of active power delivered or received at the
+premises, in kW. Positive values indicate power delivered to the premises where negative
+values indicate power received from the premises. In case if device is capable of measuring
+multi elements or phases then this will be net active power value.
+
+#### TotalReactivePower Attribute
+Reactive power represents the  current demand of reactive power delivered or 
+received at the premises, in kVAr. Positive values indicate power delivered to
+the premises where negative values indicate power received from the premises. In
+case if device is capable of measuring multi elements or phases then this will be net reactive
+power value.
+
+#### TotalApparentPower Attribute
+Represents the current demand of apparent power, in kVA. In case if device is capable of
+measuring multi elements or phases then this will be net apparent power value.
+
+#### RMSVoltage Attribute
+Represents the  most recent RMS voltage reading in Volts (V). If the RMS voltage cannot be
+measured, a value of 0xFFFF is returned.
+
+#### RMSCurrent Attribute
+Represents the most recent RMS current reading in Amps (A). If the power cannot be measured,
+a value of 0xFFFF is returned. 
+
+#### ActivePower Attribute
+Represents the single phase or Phase A, current demand of active power delivered or received at
+the premises, in Watts (W). Positive values indicate power delivered to the premises where negative
+values indicate power received from the premises.
+
+#### ACCurrentMultiplier Attribute
+Provides a value to be multiplied against the InstantaneousCurrent and RMSCurrentattributes. 
+his attribute must be used in conjunction with the ACCurrentDivisorattribute. 0x0000 is an invalid value for this attribute.
+
+#### ACCurrentDivisor Attribute
+Provides  a  value  to  be  divided  against the ACCurrent, InstantaneousCurrent and
+RMSCurrentattributes. This attribute must be used in conjunction with the ACCurrentMultiplierattribute
+0x0000 is an invalid value for this attribute.
+ 
+#### ACPowerMultiplier Attribute
+Provides a value to be multiplied against the InstantaneousPower and ActivePowerattributes.
+This attribute must be used in conjunction with the ACPowerDivisorattribute. 0x0000 is an invalid
+value for this attribute
+
+#### ACPowerDivisor Attribute
+Provides a value to be divided against the InstantaneousPower and ActivePowerattributes.
+This  attribute must be used in conjunction with the ACPowerMultiplierattribute. 0x0000 is an
+invalid value for this attribute.
+ 
 ### Received
 ### Generated
 

@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import com.zsmartsystems.zigbee.ExtendedPanId;
 import com.zsmartsystems.zigbee.IeeeAddress;
 import com.zsmartsystems.zigbee.ZigBeeApsFrame;
-import com.zsmartsystems.zigbee.ZigBeeException;
 import com.zsmartsystems.zigbee.ZigBeeKey;
 import com.zsmartsystems.zigbee.ZigBeeNetworkManager.ZigBeeInitializeResponse;
 import com.zsmartsystems.zigbee.ZigBeeNodeStatus;
@@ -151,7 +150,7 @@ public class ZigBeeDongleEzsp implements ZigBeeTransportTransmit, ZigBeeTranspor
         stackConfiguration.put(EzspConfigId.EZSP_CONFIG_TX_POWER_MODE, 0);
         stackConfiguration.put(EzspConfigId.EZSP_CONFIG_SUPPORTED_NETWORKS, 2);
         stackConfiguration.put(EzspConfigId.EZSP_CONFIG_KEY_TABLE_SIZE, 4);
-        stackConfiguration.put(EzspConfigId.EZSP_CONFIG_APPLICATION_ZDO_FLAGS, 0x01);
+        stackConfiguration.put(EzspConfigId.EZSP_CONFIG_APPLICATION_ZDO_FLAGS, 0x0F);
         stackConfiguration.put(EzspConfigId.EZSP_CONFIG_MAX_END_DEVICE_CHILDREN, 16);
 
         stackPolicies = new HashMap<EzspPolicyId, EzspDecisionId>();
@@ -231,13 +230,7 @@ public class ZigBeeDongleEzsp implements ZigBeeTransportTransmit, ZigBeeTranspor
 
         getNetworkParameters();
 
-        // Now initialise the network
-        EzspNetworkInitRequest networkInitRequest = new EzspNetworkInitRequest();
-        EzspTransaction networkInitTransaction = ashHandler.sendEzspTransaction(
-                new EzspSingleResponseTransaction(networkInitRequest, EzspNetworkInitResponse.class));
-        EzspNetworkInitResponse networkInitResponse = (EzspNetworkInitResponse) networkInitTransaction.getResponse();
-        logger.debug(networkInitResponse.toString());
-
+        // Add the endpoint
         EzspAddEndpointRequest addEndpoint = new EzspAddEndpointRequest();
         addEndpoint.setEndpoint(1);
         addEndpoint.setDeviceId(0);
@@ -249,6 +242,13 @@ public class ZigBeeDongleEzsp implements ZigBeeTransportTransmit, ZigBeeTranspor
                 .sendEzspTransaction(new EzspSingleResponseTransaction(addEndpoint, EzspAddEndpointResponse.class));
         EzspAddEndpointResponse addEndpointResponse = (EzspAddEndpointResponse) addEndpointTransaction.getResponse();
         logger.debug(addEndpointResponse.toString());
+
+        // Now initialise the network
+        EzspNetworkInitRequest networkInitRequest = new EzspNetworkInitRequest();
+        EzspTransaction networkInitTransaction = ashHandler.sendEzspTransaction(
+                new EzspSingleResponseTransaction(networkInitRequest, EzspNetworkInitResponse.class));
+        EzspNetworkInitResponse networkInitResponse = (EzspNetworkInitResponse) networkInitTransaction.getResponse();
+        logger.debug(networkInitResponse.toString());
 
         networkParameters = getNetworkParameters();
         getCurrentSecurityState();
@@ -382,7 +382,7 @@ public class ZigBeeDongleEzsp implements ZigBeeTransportTransmit, ZigBeeTranspor
     }
 
     @Override
-    public void sendCommand(final ZigBeeApsFrame apsFrame) throws ZigBeeException {
+    public void sendCommand(final ZigBeeApsFrame apsFrame) {
         if (ashHandler == null) {
             return;
         }
@@ -485,6 +485,7 @@ public class ZigBeeDongleEzsp implements ZigBeeTransportTransmit, ZigBeeTranspor
                 default:
                     break;
             }
+            return;
         }
 
         if (response instanceof EzspTrustCenterJoinHandler) {
@@ -513,44 +514,13 @@ public class ZigBeeDongleEzsp implements ZigBeeTransportTransmit, ZigBeeTranspor
             }
 
             zigbeeTransportReceive.nodeStatusUpdate(status, joinHandler.getNewNodeId(), joinHandler.getNewNodeEui64());
-
+            return;
         }
 
         if (response instanceof EzspChildJoinHandler) {
             EzspChildJoinHandler joinHandler = (EzspChildJoinHandler) response;
             zigbeeTransportReceive.nodeStatusUpdate(ZigBeeNodeStatus.UNSECURED_JOIN, joinHandler.getChildId(),
                     joinHandler.getChildEui64());
-
-            /*
-             * // Convert to an announce
-             * int message[] = new int[12];
-             * message[0] = 0;
-             * message[1] = childHandler.getChildId() & 0xff;
-             * message[2] = (childHandler.getChildId() >> 8) & 0xff;
-             *
-             * message[3] = (int) (childHandler.getChildEui64().getLong() & 0xFF);
-             * message[4] = (int) ((childHandler.getChildEui64().getLong() >> 8) & 0xFF);
-             * message[5] = (int) ((childHandler.getChildEui64().getLong() >> 16) & 0xFF);
-             * message[6] = (int) ((childHandler.getChildEui64().getLong() >> 24) & 0xFF);
-             * message[7] = (int) ((childHandler.getChildEui64().getLong() >> 32) & 0xFF);
-             * message[8] = (int) ((childHandler.getChildEui64().getLong() >> 40) & 0xFF);
-             * message[9] = (int) ((childHandler.getChildEui64().getLong() >> 48) & 0xFF);
-             * message[10] = (int) ((childHandler.getChildEui64().getLong() >> 56) & 0xFF);
-             *
-             * message[11] = 0;
-             *
-             * ZigBeeApsFrame apsFrame = new ZigBeeApsFrame();
-             * apsFrame.setApsCounter(0);
-             * apsFrame.setCluster(0x0013);
-             * apsFrame.setDestinationEndpoint(0);
-             * apsFrame.setProfile(0);
-             * apsFrame.setSourceEndpoint(0);
-             *
-             * apsFrame.setSequence(0);
-             * apsFrame.setSourceAddress(childHandler.getChildId());
-             * apsFrame.setPayload(message);
-             * zigbeeTransportReceive.receiveCommand(apsFrame);
-             */
             return;
         }
 

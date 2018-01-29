@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package com.zsmartsystems.zigbee.zdo.descriptors;
+package com.zsmartsystems.zigbee.zdo.field;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -20,7 +20,6 @@ import com.zsmartsystems.zigbee.CommandTest;
 import com.zsmartsystems.zigbee.ExtendedPanId;
 import com.zsmartsystems.zigbee.IeeeAddress;
 import com.zsmartsystems.zigbee.serialization.DefaultDeserializer;
-import com.zsmartsystems.zigbee.zdo.field.NeighborTable;
 import com.zsmartsystems.zigbee.zdo.field.NeighborTable.NeighborTableJoining;
 import com.zsmartsystems.zigbee.zdo.field.NeighborTable.NeighborTableRelationship;
 import com.zsmartsystems.zigbee.zdo.field.NeighborTable.NeighborTableRxState;
@@ -69,13 +68,10 @@ public class NeighborTableTest extends CommandTest {
             fieldLqi.setAccessible(true);
             fieldLqi.set(neighbor, lqi);
         } catch (IllegalAccessException | IllegalArgumentException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (SecurityException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (NoSuchFieldException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

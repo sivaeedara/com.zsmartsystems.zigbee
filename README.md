@@ -1,4 +1,4 @@
-[![Travis Build Status](https://travis-ci.org/zsmartsystems/com.zsmartsystems.zigbee.svg?branch=master)](https://travis-ci.org/zsmartsystems/com.zsmartsystems.zigbee) [![Codacy Coverage Badge](https://api.codacy.com/project/badge/Coverage/b3e149e7838947c9967f50ff3b2a01eb)](https://www.codacy.com/app/zsmartsystems/com-zsmartsystems-zigbee?utm_source=github.com&utm_medium=referral&utm_content=zsmartsystems/com.zsmartsystems.zigbee&utm_campaign=Badge_Coverage) [![Codacy Static Analyses Badge](https://api.codacy.com/project/badge/Grade/b3e149e7838947c9967f50ff3b2a01eb)](https://www.codacy.com/app/zsmartsystems/com-zsmartsystems-zigbee?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=zsmartsystems/com.zsmartsystems.zigbee&amp;utm_campaign=Badge_Grade) [![CLA Assistant Badge](https://cla-assistant.io/readme/badge/zsmartsystems/com.zsmartsystems.zigbee)](https://cla-assistant.io/zsmartsystems/com.zsmartsystems.zigbee)
+[![Travis Build Status](https://travis-ci.org/zsmartsystems/com.zsmartsystems.zigbee.svg?branch=master)](https://travis-ci.org/zsmartsystems/com.zsmartsystems.zigbee) [![Codacy Coverage Badge](https://api.codacy.com/project/badge/Coverage/b3e149e7838947c9967f50ff3b2a01eb)](https://www.codacy.com/app/zsmartsystems/com-zsmartsystems-zigbee?utm_source=github.com&utm_medium=referral&utm_content=zsmartsystems/com.zsmartsystems.zigbee&utm_campaign=Badge_Coverage) [![Codacy Static Analyses Badge](https://api.codacy.com/project/badge/Grade/b3e149e7838947c9967f50ff3b2a01eb)](https://www.codacy.com/app/zsmartsystems/com-zsmartsystems-zigbee?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=zsmartsystems/com.zsmartsystems.zigbee&amp;utm_campaign=Badge_Grade) [![CLA Assistant Badge](https://cla-assistant.io/readme/badge/zsmartsystems/com.zsmartsystems.zigbee)](https://cla-assistant.io/zsmartsystems/com.zsmartsystems.zigbee) [ ![Download](https://api.bintray.com/packages/zsmartsystems/com.zsmartsystems/zigbee/images/download.svg) ](https://bintray.com/zsmartsystems/com.zsmartsystems/zigbee/_latestVersion)
 
 # Overview
 
@@ -32,7 +32,7 @@ echo 10c4 89fb > /sys/bus/usb-serial/drivers/cp210x/new_id
 
 ### ConBee / RaspBee
 
-The library supports the Dresden Electronics RaspBee and ConBee dongles.
+The library supports the Dresden Electronics RaspBee and ConBee dongles. Note that this requires some further work.
  
 ## Tested Hardware
  
@@ -60,7 +60,15 @@ The following table provides a summary of some of the dongles / chipsets that ar
 
 * Receive: Defines the typical receive performance. A smaller number is best.
 * Transmit: Defines the maximum output power. A larger number is best.
- 
+
+## Applications
+
+The framework includes functional applications to support higher layer functionality. This includes -:
+
+* IAS CIE client
+* OTA Upgrade Server
+
+These provide minimal functionality and can be extended as required.
 
 # Contributing
 
@@ -72,6 +80,8 @@ The following table provides a summary of some of the dongles / chipsets that ar
 ## Maven goals
  
 * To build: ```mvn clean install```
+* To prepeare a new release: ```mvn release:prepare```
+* To perform a new release: ```mvn release:perform```
 * To bump the version: ```mvn release:update-versions```
 * To format the license header: ```mvn license:format```
 

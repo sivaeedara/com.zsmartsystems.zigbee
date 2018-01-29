@@ -41,10 +41,11 @@ import com.zsmartsystems.zigbee.ZigBeeNetworkManager;
 import com.zsmartsystems.zigbee.ZigBeeNetworkNodeListener;
 import com.zsmartsystems.zigbee.ZigBeeNetworkStateListener;
 import com.zsmartsystems.zigbee.ZigBeeNode;
-import com.zsmartsystems.zigbee.otaserver.ZigBeeOtaFile;
-import com.zsmartsystems.zigbee.otaserver.ZigBeeOtaServer;
-import com.zsmartsystems.zigbee.otaserver.ZigBeeOtaServerStatus;
-import com.zsmartsystems.zigbee.otaserver.ZigBeeOtaStatusCallback;
+import com.zsmartsystems.zigbee.app.iasclient.ZigBeeIasCieApp;
+import com.zsmartsystems.zigbee.app.otaserver.ZigBeeOtaFile;
+import com.zsmartsystems.zigbee.app.otaserver.ZigBeeOtaServer;
+import com.zsmartsystems.zigbee.app.otaserver.ZigBeeOtaServerStatus;
+import com.zsmartsystems.zigbee.app.otaserver.ZigBeeOtaStatusCallback;
 import com.zsmartsystems.zigbee.transport.TransportConfig;
 import com.zsmartsystems.zigbee.transport.TransportConfigOption;
 import com.zsmartsystems.zigbee.transport.TrustCentreJoinMode;
@@ -57,6 +58,8 @@ import com.zsmartsystems.zigbee.zcl.ZclAttribute;
 import com.zsmartsystems.zigbee.zcl.ZclCluster;
 import com.zsmartsystems.zigbee.zcl.ZclStatus;
 import com.zsmartsystems.zigbee.zcl.clusters.ZclBasicCluster;
+import com.zsmartsystems.zigbee.zcl.clusters.ZclIasZoneCluster;
+import com.zsmartsystems.zigbee.zcl.clusters.ZclOnOffCluster;
 import com.zsmartsystems.zigbee.zcl.clusters.ZclOtaUpgradeCluster;
 import com.zsmartsystems.zigbee.zcl.clusters.general.ConfigureReportingResponse;
 import com.zsmartsystems.zigbee.zcl.clusters.general.ReadAttributesResponse;
@@ -169,6 +172,8 @@ public final class ZigBeeConsole {
 
         commands.put("rediscover", new RediscoverCommand());
 
+        commands.put("stress", new StressCommand());
+
         this.networkManager = networkManager;
         zigBeeApi = new ZigBeeApi(networkManager);
 
@@ -203,6 +208,18 @@ public final class ZigBeeConsole {
             @Override
             public void nodeAdded(ZigBeeNode node) {
                 print("Node Added " + node, System.out);
+
+                ZigBeeNode coordinator = networkManager.getNode(0);
+                for (ZigBeeEndpoint endpoint : node.getEndpoints()) {
+                    if (endpoint.getInputCluster(ZclIasZoneCluster.CLUSTER_ID) != null) {
+                        endpoint.addExtension(new ZigBeeIasCieApp(coordinator.getIeeeAddress(), 0));
+                        break;
+                    }
+                    if (endpoint.getInputCluster(ZclOtaUpgradeCluster.CLUSTER_ID) != null) {
+                        endpoint.addExtension(new ZigBeeOtaServer());
+                        break;
+                    }
+                }
             }
 
             @Override
@@ -634,9 +651,9 @@ public final class ZigBeeConsole {
             // out);
             print("Device Version   : " + device.getDeviceVersion(), out);
             print("Input Clusters   : ", out);
-            printClusters(device, device.getInputClusterIds(), out);
+            printClusters(device, device.getInputClusterIds(), true, out);
             print("Output Clusters  : ", out);
-            printClusters(device, device.getOutputClusterIds(), out);
+            printClusters(device, device.getOutputClusterIds(), false, out);
 
             return true;
         }
@@ -646,11 +663,18 @@ public final class ZigBeeConsole {
          *
          * @param device the device
          * @param collection the cluster IDs
+         * @param input
          * @param out the output print stream
          */
-        private void printClusters(final ZigBeeEndpoint device, final Collection<Integer> collection, PrintStream out) {
+        private void printClusters(final ZigBeeEndpoint device, final Collection<Integer> collection, boolean input,
+                PrintStream out) {
             for (int clusterId : collection) {
-                ZclCluster cluster = device.getCluster(clusterId);
+                ZclCluster cluster;
+                if (input) {
+                    cluster = device.getInputCluster(clusterId);
+                } else {
+                    cluster = device.getOutputCluster(clusterId);
+                }
                 if (cluster != null) {
                     print("                 : " + clusterId + " " + cluster.getClusterName(), out);
                     for (ZclAttribute attribute : cluster.getAttributes()) {
@@ -896,7 +920,6 @@ public final class ZigBeeConsole {
 
             final CommandResult response = zigbeeApi.on(destination).get();
             return defaultResponseProcessing(response, out);
-
         }
     }
 
@@ -1147,7 +1170,7 @@ public final class ZigBeeConsole {
          */
         @Override
         public String getSyntax() {
-            return "level DEVICEID LEVEL";
+            return "level DEVICEID LEVEL [RATE]";
         }
 
         /**
@@ -1155,7 +1178,7 @@ public final class ZigBeeConsole {
          */
         @Override
         public boolean process(final ZigBeeApi zigbeeApi, final String[] args, PrintStream out) throws Exception {
-            if (args.length != 3) {
+            if (args.length < 3) {
                 return false;
             }
 
@@ -1171,7 +1194,16 @@ public final class ZigBeeConsole {
                 return false;
             }
 
-            final CommandResult response = zigbeeApi.level(destination, level, 1.0).get();
+            float time = (float) 1.0;
+            if (args.length == 4) {
+                try {
+                    time = Float.parseFloat(args[3]);
+                } catch (final NumberFormatException e) {
+                    return false;
+                }
+            }
+
+            final CommandResult response = zigbeeApi.level(destination, level, time).get();
             return defaultResponseProcessing(response, out);
         }
     }
@@ -1417,7 +1449,7 @@ public final class ZigBeeConsole {
                 }
                 return true;
             } else {
-                out.println("Error executing command: " + result.getMessage());
+                out.println("Error executing command: " + result);
                 return true;
             }
         }
@@ -1490,7 +1522,7 @@ public final class ZigBeeConsole {
                 }
                 return true;
             } else {
-                out.println("Error executing command: " + result.getMessage());
+                out.println("Error executing command: " + result);
                 return true;
             }
 
@@ -1533,17 +1565,17 @@ public final class ZigBeeConsole {
             }
 
             // Check if the OTA server is already set
-            ZigBeeOtaServer otaServer = (ZigBeeOtaServer) endpoint.getServer(ZclOtaUpgradeCluster.CLUSTER_ID);
+            ZigBeeOtaServer otaServer = (ZigBeeOtaServer) endpoint.getExtension(ZclOtaUpgradeCluster.CLUSTER_ID);
             if (otaServer == null) {
                 // Create and add the server
                 otaServer = new ZigBeeOtaServer();
 
-                endpoint.addServer(otaServer);
+                endpoint.addExtension(otaServer);
 
                 otaServer.addListener(new ZigBeeOtaStatusCallback() {
                     @Override
-                    public void otaStatusUpdate(ZigBeeOtaServerStatus status) {
-                        print("OTA status callback: " + status, out);
+                    public void otaStatusUpdate(ZigBeeOtaServerStatus status, int percent) {
+                        print("OTA status callback: " + status + ", percent=" + percent, out);
                     }
                 });
             }
@@ -1678,20 +1710,19 @@ public final class ZigBeeConsole {
                     return true;
                 }
 
-                final int statusCode = response.getRecords().get(0).getStatus();
-                if (statusCode == 0) {
+                final ZclStatus statusCode = response.getRecords().get(0).getStatus();
+                if (statusCode == ZclStatus.SUCCESS) {
                     out.println("Cluster " + response.getClusterId() + ", Attribute "
                             + response.getRecords().get(0).getAttributeIdentifier() + ", type "
                             + response.getRecords().get(0).getAttributeDataType() + ", value: "
                             + response.getRecords().get(0).getAttributeValue());
                 } else {
-                    final ZclStatus status = ZclStatus.getStatus((byte) statusCode);
-                    out.println("Attribute value read error: " + status);
+                    out.println("Attribute value read error: " + statusCode);
                 }
 
                 return true;
             } else {
-                out.println("Error executing command: " + result.getMessage());
+                out.println("Error executing command: " + result);
                 return true;
             }
 
@@ -1764,7 +1795,7 @@ public final class ZigBeeConsole {
                 }
                 return true;
             } else {
-                out.println("Error executing command: " + result.getMessage());
+                out.println("Error executing command: " + result);
                 return true;
             }
         }
@@ -1827,20 +1858,19 @@ public final class ZigBeeConsole {
             if (result.isSuccess()) {
                 final ReadAttributesResponse response = result.getResponse();
 
-                final int statusCode = response.getRecords().get(0).getStatus();
-                if (statusCode == 0) {
+                final ZclStatus statusCode = response.getRecords().get(0).getStatus();
+                if (statusCode == ZclStatus.SUCCESS) {
                     out.println("Cluster " + response.getClusterId() + ", Attribute "
                             + response.getRecords().get(0).getAttributeIdentifier() + ", type "
                             + response.getRecords().get(0).getAttributeDataType() + ", value: "
                             + response.getRecords().get(0).getAttributeValue());
                 } else {
-                    final ZclStatus status = ZclStatus.getStatus((byte) statusCode);
-                    out.println("Attribute value read error: " + status);
+                    out.println("Attribute value read error: " + statusCode);
                 }
 
                 return true;
             } else {
-                out.println("Error executing command: " + result.getMessage());
+                out.println("Error executing command: " + result);
                 return true;
             }
 
@@ -1982,12 +2012,11 @@ public final class ZigBeeConsole {
             if (result) {
                 for (Integer attributeId : cluster.getSupportedAttributes()) {
                     ZclAttribute attribute = cluster.getAttribute(attributeId);
-                    String name = "unknown";
+                    out.print("Cluster " + cluster.getClusterId() + ", Attribute=" + attributeId);
                     if (attribute != null) {
-                        name = attribute.getName();
+                        out.print(",  Type=" + attribute.getDataType() + ", " + attribute.getName());
                     }
-                    out.println("Cluster " + cluster.getClusterId() + ", Attribute=" + attribute.getId() + ",  Type="
-                            + attribute.getDataType() + ", " + name);
+                    out.println();
                 }
 
                 return true;
@@ -2556,7 +2585,7 @@ public final class ZigBeeConsole {
                 }
                 return true;
             } else {
-                out.println("Error executing command: " + result.getMessage());
+                out.println("Error executing command: " + result);
                 return true;
             }
         }
@@ -2608,7 +2637,7 @@ public final class ZigBeeConsole {
                 out.println();
                 return true;
             } else {
-                out.println("Error executing command: " + result.getMessage());
+                out.println("Error executing command: " + result);
                 return true;
             }
         }
@@ -2818,6 +2847,117 @@ public final class ZigBeeConsole {
     }
 
     /**
+     * Stress the system by sending a command to a node
+     */
+    private class StressCommand implements ConsoleCommand {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getDescription() {
+            return "Stress test. Note after sending this command you will need to stop the console.";
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getSyntax() {
+            return "stress NODEID";
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean process(final ZigBeeApi zigbeeApi, final String[] args, final PrintStream out) throws Exception {
+            if (args.length != 2) {
+                return false;
+            }
+
+            final ZigBeeEndpoint endpoint = getDevice(zigbeeApi, args[1]);
+            if (endpoint == null) {
+                print("Endpoint not found.", out);
+                return false;
+            }
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    int cnt = 0;
+                    while (true) {
+                        print("STRESSING 1 CNT: " + cnt++, out);
+                        ZclOnOffCluster cluster = (ZclOnOffCluster) endpoint
+                                .getInputCluster(ZclOnOffCluster.CLUSTER_ID);
+                        cluster.onCommand();
+                        try {
+                            Thread.sleep(167);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    int cnt = 0;
+                    while (true) {
+                        print("STRESSING 2 CNT: " + cnt++, out);
+                        ZclOnOffCluster cluster = (ZclOnOffCluster) endpoint
+                                .getInputCluster(ZclOnOffCluster.CLUSTER_ID);
+                        cluster.onCommand();
+                        try {
+                            Thread.sleep(107);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    int cnt = 0;
+                    while (true) {
+                        print("STRESSING 3 CNT: " + cnt++, out);
+                        ZclOnOffCluster cluster = (ZclOnOffCluster) endpoint
+                                .getInputCluster(ZclOnOffCluster.CLUSTER_ID);
+                        cluster.onCommand();
+                        try {
+                            Thread.sleep(131);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    int cnt = 0;
+                    while (true) {
+                        print("STRESSING 4 CNT: " + cnt++, out);
+                        ZclOnOffCluster cluster = (ZclOnOffCluster) endpoint
+                                .getInputCluster(ZclOnOffCluster.CLUSTER_ID);
+                        cluster.onCommand();
+                        try {
+                            Thread.sleep(187);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
+
+            return true;
+        }
+    }
+
+    /**
      * Default processing for command result.
      *
      * @param result the command result
@@ -2829,7 +2969,7 @@ public final class ZigBeeConsole {
             out.println("Success response received.");
             return true;
         } else {
-            out.println("Error executing command: " + result.getMessage());
+            out.println("Error executing command: " + result);
             return true;
         }
     }

@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.zsmartsystems.zigbee.ZigBeeCommand;
 import com.zsmartsystems.zigbee.ZigBeeCommandListener;
-import com.zsmartsystems.zigbee.ZigBeeException;
 import com.zsmartsystems.zigbee.ZigBeeNetworkManager;
 import com.zsmartsystems.zigbee.ZigBeeNode;
 import com.zsmartsystems.zigbee.zdo.ZdoStatus;
@@ -52,7 +51,10 @@ public class ClusterMatcher implements ZigBeeCommandListener {
      * @param networkManager the {@link ZigBeeNetworkManager} to which this matcher is linked
      */
     public ClusterMatcher(ZigBeeNetworkManager networkManager) {
+        logger.debug("{}: ClusterMatcher starting", networkManager.getZigBeeExtendedPanId());
         this.networkManager = networkManager;
+
+        networkManager.addCommandListener(this);
     }
 
     /**
@@ -61,6 +63,7 @@ public class ClusterMatcher implements ZigBeeCommandListener {
      * @param cluster the cluster to match
      */
     public void addCluster(int cluster) {
+        logger.debug("{}: ClusterMatcher adding cluster {}", networkManager.getZigBeeExtendedPanId(), cluster);
         clusters.add(cluster);
     }
 
@@ -69,6 +72,8 @@ public class ClusterMatcher implements ZigBeeCommandListener {
         // If we have local servers matching the request, then we need to respond
         if (command instanceof MatchDescriptorRequest) {
             MatchDescriptorRequest matchRequest = (MatchDescriptorRequest) command;
+            logger.debug("{}: ClusterMatcher received request {}", networkManager.getZigBeeExtendedPanId(),
+                    matchRequest);
             if (matchRequest.getProfileId() != 0x104) {
                 // TODO: Do we need to restrict the profile? Remove this check?
                 return;
@@ -78,6 +83,7 @@ public class ClusterMatcher implements ZigBeeCommandListener {
             // requested clusters in the requests cluster list
             if (Collections.disjoint(matchRequest.getInClusterList(), clusters)
                     && Collections.disjoint(matchRequest.getOutClusterList(), clusters)) {
+                logger.debug("{}: ClusterMatcher no match", networkManager.getZigBeeExtendedPanId());
                 return;
             }
 
@@ -88,11 +94,9 @@ public class ClusterMatcher implements ZigBeeCommandListener {
             matchResponse.setMatchList(matchList);
 
             matchResponse.setDestinationAddress(command.getSourceAddress());
-            try {
-                networkManager.sendCommand(matchResponse);
-            } catch (ZigBeeException e) {
-                logger.debug("Error sending MatchDescriptorResponse ", e);
-            }
+            matchResponse.setNwkAddrOfInterest(command.getSourceAddress().getAddress());
+            logger.debug("{}: ClusterMatcher sending match {}", networkManager.getZigBeeExtendedPanId(), matchResponse);
+            networkManager.sendCommand(matchResponse);
         }
     }
 }

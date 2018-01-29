@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package com.zsmartsystems.zigbee.otaserver;
+package com.zsmartsystems.zigbee.app.otaserver;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,9 +24,9 @@ import org.slf4j.LoggerFactory;
 
 import com.zsmartsystems.zigbee.CommandResult;
 import com.zsmartsystems.zigbee.ZigBeeCommand;
+import com.zsmartsystems.zigbee.app.ZigBeeApplication;
 import com.zsmartsystems.zigbee.internal.NotificationService;
 import com.zsmartsystems.zigbee.zcl.ZclCluster;
-import com.zsmartsystems.zigbee.zcl.ZclServer;
 import com.zsmartsystems.zigbee.zcl.ZclStatus;
 import com.zsmartsystems.zigbee.zcl.clusters.ZclOtaUpgradeCluster;
 import com.zsmartsystems.zigbee.zcl.clusters.otaupgrade.ImageBlockCommand;
@@ -105,7 +105,7 @@ import com.zsmartsystems.zigbee.zcl.field.ByteArray;
  *
  * @author Chris Jackson
  */
-public class ZigBeeOtaServer implements ZclServer {
+public class ZigBeeOtaServer implements ZigBeeApplication {
     /**
      * A static Thread pool is used here to ensure that we don't end up with large numbers of page requests
      * spawning multiple threads. This should ensure a level of pacing if we had a lot of devices on the network that
@@ -188,6 +188,11 @@ public class ZigBeeOtaServer implements ZclServer {
      * Current timer task
      */
     private TimerTask timerTask = null;
+
+    /**
+     * The current percentage complete
+     */
+    private int percentComplete = 0;
 
     /**
      * Default transfer timeout period in milliseconds
@@ -469,12 +474,11 @@ public class ZigBeeOtaServer implements ZclServer {
                 NotificationService.execute(new Runnable() {
                     @Override
                     public void run() {
-                        statusListener.otaStatusUpdate(updatedStatus);
+                        statusListener.otaStatusUpdate(updatedStatus, percentComplete);
                     }
                 });
             }
         }
-
     }
 
     /**
@@ -692,6 +696,15 @@ public class ZigBeeOtaServer implements ZclServer {
         // Restart the timer
         startTransferTimer();
 
+        int percent = command.getFileOffset() * 100 / otaFile.getImageSize();
+        if (percent > 100) {
+            percent = 100;
+        }
+        if (percent != percentComplete) {
+            percentComplete = percent;
+            updateStatus(ZigBeeOtaServerStatus.OTA_TRANSFER_IN_PROGRESS);
+        }
+
         // Send the block response
         sendImageBlock(command.getFileOffset(), command.getMaximumDataSize());
     }
@@ -722,6 +735,8 @@ public class ZigBeeOtaServer implements ZclServer {
 
         // Stop the transfer timer
         stopTransferTimer();
+
+        percentComplete = 100;
 
         // Handle the status
         switch (command.getStatus()) {

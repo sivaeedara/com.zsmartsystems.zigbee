@@ -14,7 +14,6 @@ import com.zsmartsystems.zigbee.ExtendedPanId;
 import com.zsmartsystems.zigbee.IeeeAddress;
 import com.zsmartsystems.zigbee.ZigBeeApsFrame;
 import com.zsmartsystems.zigbee.ZigBeeEndpointAddress;
-import com.zsmartsystems.zigbee.ZigBeeException;
 import com.zsmartsystems.zigbee.ZigBeeGroupAddress;
 import com.zsmartsystems.zigbee.ZigBeeKey;
 import com.zsmartsystems.zigbee.ZigBeeNetworkManager.ZigBeeInitializeResponse;
@@ -224,7 +223,6 @@ public class ZigBeeDongleConBee implements ZigBeeTransportTransmit {
 
     @Override
     public boolean setZigBeeNetworkKey(ZigBeeKey key) {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -246,7 +244,6 @@ public class ZigBeeDongleConBee implements ZigBeeTransportTransmit {
 
     @Override
     public boolean setTcLinkKey(ZigBeeKey key) {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -282,7 +279,7 @@ public class ZigBeeDongleConBee implements ZigBeeTransportTransmit {
     }
 
     @Override
-    public void sendCommand(final ZigBeeApsFrame apsFrame) throws ZigBeeException {
+    public void sendCommand(final ZigBeeApsFrame apsFrame) {
         ConBeeEnqueueSendDataRequest request = new ConBeeEnqueueSendDataRequest();
 
         request.setRequestId(apsFrame.getSequence());

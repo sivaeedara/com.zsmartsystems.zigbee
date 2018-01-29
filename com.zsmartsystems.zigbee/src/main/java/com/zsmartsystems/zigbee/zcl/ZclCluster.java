@@ -7,13 +7,14 @@
  */
 package com.zsmartsystems.zigbee.zcl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -26,7 +27,6 @@ import com.zsmartsystems.zigbee.CommandResult;
 import com.zsmartsystems.zigbee.IeeeAddress;
 import com.zsmartsystems.zigbee.ZigBeeEndpoint;
 import com.zsmartsystems.zigbee.ZigBeeEndpointAddress;
-import com.zsmartsystems.zigbee.ZigBeeException;
 import com.zsmartsystems.zigbee.ZigBeeNetworkManager;
 import com.zsmartsystems.zigbee.internal.NotificationService;
 import com.zsmartsystems.zigbee.zcl.clusters.general.ConfigureReportingCommand;
@@ -48,7 +48,6 @@ import com.zsmartsystems.zigbee.zcl.field.AttributeReportingConfigurationRecord;
 import com.zsmartsystems.zigbee.zcl.field.ReadAttributeStatusRecord;
 import com.zsmartsystems.zigbee.zcl.field.WriteAttributeRecord;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclCommandDirection;
-import com.zsmartsystems.zigbee.zdo.ZdoResponseMatcher;
 import com.zsmartsystems.zigbee.zdo.command.BindRequest;
 import com.zsmartsystems.zigbee.zdo.command.UnbindRequest;
 
@@ -96,7 +95,7 @@ public abstract class ZclCluster {
      * After initialisation, the list will contain an empty list. Once a successful call to
      * {@link #discoverAttributes()} has been made, the list will reflect the attributes supported by the remote device.
      */
-    private final Set<Integer> supportedAttributes = new HashSet<Integer>();
+    private final Set<Integer> supportedAttributes = new TreeSet<Integer>();
 
     /**
      * The list of supported commands that the remote device can generate
@@ -109,9 +108,14 @@ public abstract class ZclCluster {
     private final Set<Integer> supportedCommandsGenerated = new HashSet<Integer>();
 
     /**
-     * List of listeners to receive notifications when an attribute updates its value
+     * Set of listeners to receive notifications when an attribute updates its value
      */
-    private final List<ZclAttributeListener> attributeListeners = new ArrayList<ZclAttributeListener>();
+    private final Set<ZclAttributeListener> attributeListeners = new CopyOnWriteArraySet<ZclAttributeListener>();
+
+    /**
+     * Set of listeners to receive notifications when a command is received
+     */
+    private final Set<ZclCommandListener> commandListeners = new CopyOnWriteArraySet<ZclCommandListener>();
 
     /**
      * Map of attributes supported by the cluster. This contains all attributes, even if they are not supported by the
@@ -119,6 +123,13 @@ public abstract class ZclCluster {
      * method followed by the {@link #getSupportedAttributes()} method.
      */
     protected Map<Integer, ZclAttribute> attributes = initializeAttributes();
+
+    /**
+     * The {@link ZclAttributeNormalizer} is used to normalize attribute data types to ensure that data types are
+     * consistent with the ZCL definition. This ensures that the application can rely on consistent and deterministic
+     * data type when listening to attribute updates.
+     */
+    private final ZclAttributeNormalizer normalizer;
 
     /**
      * Abstract method called when the cluster starts to initialise the list of attributes defined in this cluster by
@@ -134,6 +145,7 @@ public abstract class ZclCluster {
         this.zigbeeEndpoint = zigbeeEndpoint;
         this.clusterId = clusterId;
         this.clusterName = clusterName;
+        this.normalizer = new ZclAttributeNormalizer();
     }
 
     protected Future<CommandResult> send(ZclCommand command) {
@@ -142,7 +154,7 @@ public abstract class ZclCluster {
             command.setCommandDirection(ZclCommandDirection.SERVER_TO_CLIENT);
         }
 
-        return zigbeeManager.unicast(command, new ZclResponseMatcher());
+        return zigbeeManager.unicast(command, new ZclTransactionMatcher());
     }
 
     /**
@@ -180,7 +192,6 @@ public abstract class ZclCluster {
         command.setDestinationAddress(zigbeeEndpoint.getEndpointAddress());
 
         return send(command);
-        // return zigbeeManager.unicast(command, new ZclCustomResponseMatcher());
     }
 
     /**
@@ -195,12 +206,10 @@ public abstract class ZclCluster {
         try {
             result = read(attribute).get();
         } catch (InterruptedException e) {
-            e.printStackTrace();
-            logger.debug("readSync interrupted", e);
+            logger.debug("readSync interrupted");
             return null;
         } catch (ExecutionException e) {
-            e.printStackTrace();
-            logger.debug("readSync exception", e);
+            logger.debug("readSync exception ", e);
             return null;
         }
 
@@ -209,8 +218,9 @@ public abstract class ZclCluster {
         }
 
         ReadAttributesResponse response = result.getResponse();
-        if (response.getRecords().get(0).getStatus() == 0) {
-            return response.getRecords().get(0).getAttributeValue();
+        if (response.getRecords().get(0).getStatus() == ZclStatus.SUCCESS) {
+            ReadAttributeStatusRecord attributeRecord = response.getRecords().get(0);
+            return normalizer.normalizeZclData(attribute.getDataType(), attributeRecord.getAttributeValue());
         }
 
         return null;
@@ -263,7 +273,6 @@ public abstract class ZclCluster {
         command.setDestinationAddress(zigbeeEndpoint.getEndpointAddress());
 
         return send(command);
-        // return zigbeeManager.unicast(command, new ZclResponseMatcher());
     }
 
     /**
@@ -309,7 +318,6 @@ public abstract class ZclCluster {
         command.setDestinationAddress(zigbeeEndpoint.getEndpointAddress());
 
         return send(command);
-        // return zigbeeManager.unicast(command, new ZclResponseMatcher());
     }
 
     /**
@@ -410,14 +418,14 @@ public abstract class ZclCluster {
      */
     public Future<CommandResult> bind(IeeeAddress address, int endpointId) {
         final BindRequest command = new BindRequest();
-        command.setDestinationAddress(zigbeeEndpoint.getEndpointAddress());
+        command.setDestinationAddress(new ZigBeeEndpointAddress(zigbeeEndpoint.getEndpointAddress().getAddress()));
         command.setSrcAddress(zigbeeEndpoint.getIeeeAddress());
         command.setSrcEndpoint(zigbeeEndpoint.getEndpointId());
         command.setBindCluster(clusterId);
         command.setDstAddrMode(3); // 64 bit addressing
         command.setDstAddress(address);
         command.setDstEndpoint(endpointId);
-        return zigbeeManager.unicast(command, new ZdoResponseMatcher());
+        return zigbeeManager.unicast(command, new BindRequest());
     }
 
     /**
@@ -438,13 +446,14 @@ public abstract class ZclCluster {
      */
     public Future<CommandResult> unbind(IeeeAddress address, int endpointId) {
         final UnbindRequest command = new UnbindRequest();
+        command.setDestinationAddress(new ZigBeeEndpointAddress(zigbeeEndpoint.getEndpointAddress().getAddress()));
         command.setSrcAddress(zigbeeEndpoint.getIeeeAddress());
         command.setSrcEndpoint(zigbeeEndpoint.getEndpointId());
-        command.setClusterId(clusterId);
+        command.setBindCluster(clusterId);
         command.setDstAddrMode(3); // 64 bit addressing
         command.setDstAddress(address);
         command.setDstEndpoint(endpointId);
-        return zigbeeManager.unicast(command, new ZdoResponseMatcher());
+        return zigbeeManager.unicast(command, new UnbindRequest());
     }
 
     /**
@@ -469,11 +478,7 @@ public abstract class ZclCluster {
         defaultResponse.setClusterId(clusterId);
         defaultResponse.setStatusCode(status);
 
-        try {
-            zigbeeManager.sendCommand(defaultResponse);
-        } catch (ZigBeeException e) {
-            logger.debug("Exception sending default response message: ", e);
-        }
+        zigbeeManager.sendCommand(defaultResponse);
     }
 
     /**
@@ -491,6 +496,19 @@ public abstract class ZclCluster {
             }
 
             return supportedAttributes;
+        }
+    }
+
+    /**
+     * Checks if the cluster supports a specified attribute ID.
+     * Note that if {@link #discoverAttributes(boolean)} has not been called, this method will return false.
+     *
+     * @param attributeId the attribute to check
+     * @return true if the attribute is known to be supported, otherwise false
+     */
+    public boolean isAttributeSupported(int attributeId) {
+        synchronized (supportedAttributes) {
+            return supportedAttributes.contains(attributeId);
         }
     }
 
@@ -531,14 +549,14 @@ public abstract class ZclCluster {
 
                         CommandResult result = send(command).get();
                         if (result.isError()) {
-                            break;
+                            return false;
                         }
 
                         DiscoverAttributesResponse response = (DiscoverAttributesResponse) result.getResponse();
                         complete = response.getDiscoveryComplete();
                         if (response.getAttributeInformation() != null) {
-                            index += response.getAttributeInformation().size();
                             attributes.addAll(response.getAttributeInformation());
+                            index = Collections.max(attributes).getIdentifier() + 1;
                         }
                     } while (!complete);
 
@@ -569,6 +587,19 @@ public abstract class ZclCluster {
     }
 
     /**
+     * Checks if the cluster supports a specified received command ID.
+     * Note that if {@link #discoverCommandsReceived(boolean)} has not been called, this method will return false.
+     *
+     * @param commandId the attribute to check
+     * @return true if the command is known to be supported, otherwise false
+     */
+    public boolean isReceivedCommandSupported(int commandId) {
+        synchronized (supportedCommandsReceived) {
+            return supportedCommandsReceived.contains(commandId);
+        }
+    }
+
+    /**
      * Discovers the list of commands received by the cluster on the remote device. If the discovery is successful,
      * users should call {@link ZclCluster#getSupportedCommandsReceived()} to get the list of supported commands.
      * <p>
@@ -586,7 +617,7 @@ public abstract class ZclCluster {
                 // cluster which would cause errors consolidating the responses
                 synchronized (supportedCommandsReceived) {
                     // If we don't want to rediscover, and we already have the list of attributes, then return
-                    if (!rediscover && !supportedAttributes.isEmpty()) {
+                    if (!rediscover && !supportedCommandsReceived.isEmpty()) {
                         return true;
                     }
 
@@ -603,15 +634,15 @@ public abstract class ZclCluster {
 
                         CommandResult result = send(command).get();
                         if (result.isError()) {
-                            break;
+                            return false;
                         }
 
                         DiscoverCommandsReceivedResponse response = (DiscoverCommandsReceivedResponse) result
                                 .getResponse();
                         complete = response.getDiscoveryComplete();
                         if (response.getCommandIdentifiers() != null) {
-                            index += response.getCommandIdentifiers().size();
                             commands.addAll(response.getCommandIdentifiers());
+                            index = Collections.max(commands) + 1;
                         }
                     } while (!complete);
 
@@ -640,6 +671,19 @@ public abstract class ZclCluster {
     }
 
     /**
+     * Checks if the cluster supports a specified generated command ID.
+     * Note that if {@link #discoverCommandsGenerated(boolean)} has not been called, this method will return false.
+     *
+     * @param commandId the attribute to check
+     * @return true if the command is known to be supported, otherwise false
+     */
+    public boolean isGeneratedCommandSupported(int commandId) {
+        synchronized (supportedCommandsGenerated) {
+            return supportedCommandsGenerated.contains(commandId);
+        }
+    }
+
+    /**
      * Discovers the list of commands generated by the cluster on the remote device If the discovery is successful,
      * users should call {@link ZclCluster#getSupportedCommandsGenerated()} to get the list of supported commands.
      * <p>
@@ -657,7 +701,7 @@ public abstract class ZclCluster {
                 // cluster which would cause errors consolidating the responses
                 synchronized (supportedCommandsGenerated) {
                     // If we don't want to rediscover, and we already have the list of attributes, then return
-                    if (!rediscover && !supportedAttributes.isEmpty()) {
+                    if (!rediscover && !supportedCommandsGenerated.isEmpty()) {
                         return true;
                     }
                     int index = 0;
@@ -673,15 +717,15 @@ public abstract class ZclCluster {
 
                         CommandResult result = send(command).get();
                         if (result.isError()) {
-                            break;
+                            return false;
                         }
 
                         DiscoverCommandsGeneratedResponse response = (DiscoverCommandsGeneratedResponse) result
                                 .getResponse();
                         complete = response.getDiscoveryComplete();
                         if (response.getCommandIdentifiers() != null) {
-                            index += response.getCommandIdentifiers().size();
                             commands.addAll(response.getCommandIdentifiers());
+                            index = Collections.max(commands) + 1;
                         }
                     } while (!complete);
 
@@ -698,6 +742,11 @@ public abstract class ZclCluster {
         return future;
     }
 
+    /**
+     * Adds a {@link ZclAttributeListener} to receive reports when an attribute is updated
+     *
+     * @param listener the {@link ZclAttributeListener} to add
+     */
     public void addAttributeListener(ZclAttributeListener listener) {
         // Don't add more than once.
         if (attributeListeners.contains(listener)) {
@@ -732,34 +781,93 @@ public abstract class ZclCluster {
     }
 
     /**
+     * Adds a {@link ZclCommandListener} to receive commands
+     *
+     * @param listener the {@link ZclCommandListener} to add
+     */
+    public void addCommandListener(ZclCommandListener listener) {
+        // Don't add more than once.
+        if (commandListeners.contains(listener)) {
+            return;
+        }
+        commandListeners.add(listener);
+    }
+
+    /**
+     * Remove a {@link ZclCommandListener} from the cluster.
+     *
+     * @param listener callback listener implementing {@link ZclCommandListener} to remove
+     */
+    public void removeCommandListener(final ZclCommandListener listener) {
+        commandListeners.remove(listener);
+    }
+
+    /**
+     * Notify command listeners of an received {@link ZclCommand}.
+     *
+     * @param command the {@link ZclCommand} to notify
+     */
+    private void notifyCommandListener(final ZclCommand command) {
+        for (final ZclCommandListener listener : commandListeners) {
+            NotificationService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.commandReceived(command);
+                }
+            });
+        }
+    }
+
+    /**
      * Processes a list of attribute reports for this cluster
      *
-     * @param reports
-     *            {@List} of {@link AttributeReport}
+     * @param reports {@List} of {@link AttributeReport}
      */
     public void handleAttributeReport(List<AttributeReport> reports) {
         for (AttributeReport report : reports) {
             ZclAttribute attribute = attributes.get(report.getAttributeIdentifier());
             if (attribute == null) {
-                return;
+                logger.debug("{}: Unknown attribute {} in cluster {}", zigbeeEndpoint.getEndpointAddress(),
+                        report.getAttributeIdentifier(), clusterId);
+            } else {
+                attribute.updateValue(normalizer.normalizeZclData(attribute.getDataType(), report.getAttributeValue()));
+                notifyAttributeListener(attribute);
             }
-            attribute.updateValue(report.getAttributeValue());
-            notifyAttributeListener(attribute);
         }
     }
 
     /**
      * Processes a list of attribute status reports for this cluster
      *
-     * @param reports
-     *            {@List} of {@link ReadAttributeStatusRecord}
+     * @param reports {@List} of {@link ReadAttributeStatusRecord}
      */
     public void handleAttributeStatus(List<ReadAttributeStatusRecord> records) {
         for (ReadAttributeStatusRecord record : records) {
+            if (record.getStatus() != ZclStatus.SUCCESS) {
+                logger.debug("{}: Error reading attribute {} in cluster {} - {}", zigbeeEndpoint.getEndpointAddress(),
+                        record.getAttributeIdentifier(), clusterId, record.getStatus());
+                continue;
+            }
+
             ZclAttribute attribute = attributes.get(record.getAttributeIdentifier());
-            attribute.updateValue(record.getAttributeValue());
-            notifyAttributeListener(attribute);
+            if (attribute == null) {
+                logger.debug("{}: Unknown attribute {} in cluster {}", zigbeeEndpoint.getEndpointAddress(),
+                        record.getAttributeIdentifier(), clusterId);
+            } else {
+                attribute.updateValue(normalizer.normalizeZclData(attribute.getDataType(), record.getAttributeValue()));
+                notifyAttributeListener(attribute);
+            }
         }
+    }
+
+    /**
+     * Processes a command received in this cluster. This is called from the node so we already know that the command is
+     * addressed to this endpoint and this cluster.
+     *
+     * @param command the received {@link ZclCommand}
+     */
+    public void handleCommand(ZclCommand command) {
+        notifyCommandListener(command);
     }
 
     /**
