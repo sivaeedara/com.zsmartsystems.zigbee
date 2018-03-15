@@ -100,11 +100,13 @@ public class ZigBeeNetworkManagerTest {
         try {
             privateMethod = ZigBeeNetworkManager.class.getDeclaredMethod("buildChannelMask", new Class[] { int.class });
             privateMethod.setAccessible(true);
+//if the channel are outside the range of 11 and 27, set the default to 0x07FFF800
+
 
             mask = (int[]) privateMethod.invoke(networkManager, -1);
-            assertTrue(Arrays.equals(new int[] { 0x00, 0x00, 0x00, 0x00 }, mask));
+            assertTrue(Arrays.equals(new int[] { 0x00, 0xF8, 0xFF, 0x07 }, mask));
             mask = (int[]) privateMethod.invoke(networkManager, 32);
-            assertTrue(Arrays.equals(new int[] { 0x00, 0x00, 0x00, 0x00 }, mask));
+            assertTrue(Arrays.equals(new int[] { 0x00, 0xF8, 0xFF, 0x07 }, mask));
             mask = (int[]) privateMethod.invoke(networkManager, 11);
             assertTrue(Arrays.equals(new int[] { 0x00, 0x08, 0x00, 0x00 }, mask));
             mask = (int[]) privateMethod.invoke(networkManager, 27);

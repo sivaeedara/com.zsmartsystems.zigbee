@@ -153,6 +153,11 @@ public class CommandInterfaceImpl implements ZToolPacketHandler, CommandInterfac
     @Override
     public void handlePacket(final ZToolPacket packet) {
         final DoubleByte cmdId = packet.getCMD();
+        if(cmdId == null){
+            logger.error("Received unknown packet. with null cmdId {}", packet.getClass()
+                .getSimpleName());
+            return;
+        }
         switch (cmdId.getMsb() & 0xE0) {
             // Received incoming message which can be either message from dongle or remote device.
             case 0x40:

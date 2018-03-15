@@ -1661,31 +1661,33 @@ No cluster specific commands.
 
 |Id     |Name                       |Type                       |Access     |Implement |Reporting |
 |-------|---------------------------|---------------------------|-----------|----------|----------|
-|0x0000 |LocalTemperature           |Unsigned 16-bit integer    |Read       |Mandatory |Mandatory |
-|0x0001 |OutdoorTemperature         |Unsigned 16-bit integer    |Read       |Optional  |          |
+|0x0000 |LocalTemperature           |Signed 16-bit integer      |Read       |Mandatory |Mandatory |
+|0x0001 |OutdoorTemperature         |Signed 16-bit integer      |Read       |Optional  |          |
 |0x0002 |Occupancy                  |Bitmap 8-bit               |Read       |Optional  |          |
-|0x0003 |AbsMinHeatSetpointLimit    |Unsigned 16-bit integer    |Read       |Optional  |          |
-|0x0004 |AbsMaxHeatSetpointLimit    |Unsigned 16-bit integer    |Read       |Optional  |          |
-|0x0005 |AbsMinCoolSetpointLimit    |Unsigned 16-bit integer    |Read       |Optional  |          |
-|0x0006 |AbsMaxCoolSetpointLimit    |Unsigned 16-bit integer    |Read       |Optional  |          |
+|0x0003 |AbsMinHeatSetpointLimit    |Signed 16-bit integer      |Read       |Optional  |          |
+|0x0004 |AbsMaxHeatSetpointLimit    |Signed 16-bit integer      |Read       |Optional  |          |
+|0x0005 |AbsMinCoolSetpointLimit    |Signed 16-bit integer      |Read       |Optional  |          |
+|0x0006 |AbsMaxCoolSetpointLimit    |Signed 16-bit integer      |Read       |Optional  |          |
 |0x0007 |PICoolingDemand            |Unsigned 8-bit integer     |Read       |Optional  |Mandatory |
 |0x0008 |PIHeatingDemand            |Unsigned 8-bit integer     |Read       |Optional  |Mandatory |
-|0x0009 |HVACSystemTypeConfiguration|Bitmap 8-bit               |Read       |Optional  |          |
-|0x0010 |LocalTemperatureCalibration|Unsigned 8-bit integer     |Read       |Optional  |          |
-|0x0011 |OccupiedCoolingSetpoint    |Unsigned 16-bit integer    |Read       |Mandatory |          |
-|0x0012 |OccupiedHeatingSetpoint    |Unsigned 16-bit integer    |Read       |Mandatory |          |
-|0x0013 |UnoccupiedCoolingSetpoint  |Unsigned 16-bit integer    |Read       |Optional  |          |
-|0x0014 |UnoccupiedHeatingSetpoint  |Unsigned 16-bit integer    |Read       |Optional  |          |
-|0x0015 |MinHeatSetpointLimit       |Unsigned 16-bit integer    |Read       |Optional  |          |
-|0x0016 |MaxHeatSetpointLimit       |Unsigned 16-bit integer    |Read       |Optional  |          |
-|0x0017 |MinCoolSetpointLimit       |Unsigned 16-bit integer    |Read       |Optional  |          |
-|0x0018 |MaxCoolSetpointLimit       |Unsigned 16-bit integer    |Read       |Optional  |          |
-|0x0019 |MinSetpointDeadBand        |Unsigned 8-bit integer     |Read       |Optional  |          |
-|0x001A |RemoteSensing              |Bitmap 8-bit               |Read       |Optional  |          |
-|0x001B |ControlSequenceOfOperation |Enumeration 8-bit          |Read       |Mandatory |          |
-|0x001C |SystemMode                 |Enumeration 8-bit          |Read       |Mandatory |          |
-|0x001D |AlarmMask                  |Enumeration 8-bit          |Read       |Optional  |          |
+|0x0009 |HVACSystemTypeConfiguration|Bitmap 8-bit               |Read/Write |Optional  |          |
+|0x0010 |LocalTemperatureCalibration|Signed 8-bit integer       |Read/Write |Optional  |          |
+|0x0011 |OccupiedCoolingSetpoint    |Signed 16-bit integer      |Read/Write |Mandatory |          |
+|0x0012 |OccupiedHeatingSetpoint    |Signed 16-bit integer      |Read/Write |Mandatory |          |
+|0x0013 |UnoccupiedCoolingSetpoint  |Signed 16-bit integer      |Read/Write |Optional  |          |
+|0x0014 |UnoccupiedHeatingSetpoint  |Signed 16-bit integer      |Read/Write |Optional  |          |
+|0x0015 |MinHeatSetpointLimit       |Signed 16-bit integer      |Read/Write |Optional  |          |
+|0x0016 |MaxHeatSetpointLimit       |Signed 16-bit integer      |Read/Write |Optional  |          |
+|0x0017 |MinCoolSetpointLimit       |Signed 16-bit integer      |Read/Write |Optional  |          |
+|0x0018 |MaxCoolSetpointLimit       |Signed 16-bit integer      |Read/Write |Optional  |          |
+|0x0019 |MinSetpointDeadBand        |Signed 8-bit integer       |Read/Write |Optional  |          |
+|0x001A |RemoteSensing              |Bitmap 8-bit               |Read/Write |Optional  |          |
+|0x001B |ControlSequenceOfOperation |Enumeration 8-bit          |Read/Write |Mandatory |          |
+|0x001C |SystemMode                 |Enumeration 8-bit          |Read/Write |Mandatory |          |
+|0x001D |AlarmMask                  |Bitmap 8-bit               |Read       |Optional  |          |
 |0x001E |ThermostatRunningMode      |Enumeration 8-bit          |Read       |Optional  |          |
+|0xF01C |TelkonetHVACRunningMode    |Enumeration 8-bit          |Read       |Optional  |Mandatory |
+|0xF020 |TelkonetHVACDeadband       |Signed 16-bit integer      |Read       |Optional  |          |
 
 #### LocalTemperature Attribute
 LocalTemperature represents the temperature in degrees Celsius, as measured locally.
@@ -1811,6 +1813,13 @@ ii) generate new log record at the time of request and send Get Relay Status Log
 
 
 ## Fan Control [0x0202]
+
+### Attributes
+
+|Id     |Name                       |Type                       |Access     |Implement |Reporting |
+|-------|---------------------------|---------------------------|-----------|----------|----------|
+|0x0000 |FanMode                    |Enumeration 8-bit          |Read/Write |Mandatory |Mandatory |
+|0x0001 |FanModeSequence            |Enumeration 8-bit          |Read/Write |Mandatory |          |
 
 ### Received
 

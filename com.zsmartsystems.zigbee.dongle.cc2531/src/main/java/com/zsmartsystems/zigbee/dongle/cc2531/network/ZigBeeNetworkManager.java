@@ -717,11 +717,18 @@ public class ZigBeeNetworkManager {
     }
 
     private final int[] buildChannelMask(int channel) {
+        boolean automaticChannelSetup = false;
+        int channelMask =0;
         if (channel < 11 || channel > 27) {
-            return new int[] { 0, 0, 0, 0 };
+            automaticChannelSetup =true;
+            logger.warn("channel specified is not in range of 11 and 27, setting channels "
+                + "automatically through scanning");
+            // (0x07FFF800)16 = (134215680)10
+             channelMask = 134215680;
         }
-
-        int channelMask = 1 << channel;
+        else {
+            channelMask = 1 << channel;
+        }
         int[] mask = new int[4];
 
         for (int i = 0; i < mask.length; i++) {
