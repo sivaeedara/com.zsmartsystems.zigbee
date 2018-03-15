@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,34 +18,34 @@ import org.slf4j.LoggerFactory;
 import com.zsmartsystems.zigbee.ExtendedPanId;
 import com.zsmartsystems.zigbee.IeeeAddress;
 import com.zsmartsystems.zigbee.ZigBeeChannelMask;
-import com.zsmartsystems.zigbee.dongle.ember.ash.AshFrameHandler;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.EzspFrameResponse;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspEnergyScanResultHandler;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspFormNetworkRequest;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspFormNetworkResponse;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspGetNetworkParametersRequest;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspGetNetworkParametersResponse;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspLeaveNetworkRequest;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspLeaveNetworkResponse;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspNetworkFoundHandler;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspNetworkStateRequest;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspNetworkStateResponse;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspScanCompleteHandler;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspSetInitialSecurityStateRequest;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspSetInitialSecurityStateResponse;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspStartScanRequest;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.command.EzspStartScanResponse;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.structure.EmberInitialSecurityBitmask;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.structure.EmberInitialSecurityState;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.structure.EmberJoinMethod;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.structure.EmberKeyData;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.structure.EmberNetworkParameters;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.structure.EmberNetworkStatus;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.structure.EmberStatus;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.structure.EzspNetworkScanType;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.transaction.EzspMultiResponseTransaction;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.transaction.EzspSingleResponseTransaction;
-import com.zsmartsystems.zigbee.dongle.ember.ezsp.transaction.EzspTransaction;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ash.AshFrameHandler;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.EzspFrameResponse;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspEnergyScanResultHandler;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspFormNetworkRequest;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspFormNetworkResponse;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspGetNetworkParametersRequest;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspGetNetworkParametersResponse;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspLeaveNetworkRequest;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspLeaveNetworkResponse;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspNetworkFoundHandler;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspNetworkStateRequest;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspNetworkStateResponse;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspScanCompleteHandler;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspSetInitialSecurityStateRequest;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspSetInitialSecurityStateResponse;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspStartScanRequest;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.command.EzspStartScanResponse;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.structure.EmberInitialSecurityBitmask;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.structure.EmberInitialSecurityState;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.structure.EmberJoinMethod;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.structure.EmberKeyData;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.structure.EmberNetworkParameters;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.structure.EmberNetworkStatus;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.structure.EmberStatus;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.structure.EzspNetworkScanType;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.transaction.EzspMultiResponseTransaction;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.transaction.EzspSingleResponseTransaction;
+import com.zsmartsystems.zigbee.dongle.ember.internal.ezsp.transaction.EzspTransaction;
 
 /**
  * This class provides utility functions to establish an Ember ZigBee network
@@ -81,6 +81,12 @@ public class EmberNetworkInitialisation {
      * @param networkKey the {@link EmberKeyData} with the network key. This can not be set to all 00 or all FF.
      */
     public void formNetwork(EmberNetworkParameters networkParameters, EmberKeyData networkKey) {
+        if (networkParameters.getExtendedPanId() == null) {
+            networkParameters.setExtendedPanId(new ExtendedPanId());
+        }
+
+        logger.debug("Initialising Ember network with configuration {}", networkParameters);
+
         int scanDuration = 1; // 6
 
         // Leave the current network so we can initialise a new network
@@ -90,7 +96,7 @@ public class EmberNetworkInitialisation {
 
         // Perform an energy scan to find a clear channel
         int quietestChannel = doEnergyScan(scanDuration);
-        logger.debug("Energy scan reports quietest channel is " + quietestChannel);
+        logger.debug("Energy scan reports quietest channel is {}", quietestChannel);
 
         // Check if any current networks were found and avoid those channels, PAN ID and especially Extended PAN ID
         doActiveScan(scanDuration);
@@ -112,7 +118,7 @@ public class EmberNetworkInitialisation {
                 extendedPanIdBuilder.append(String.format("%02X", extendedPanId[cnt]));
             }
 
-            networkParameters.setExtendedPanId(extendedPanId);
+            networkParameters.setExtendedPanId(new ExtendedPanId(extendedPanId));
             logger.debug("Created random Extended PAN ID: {}", extendedPanIdBuilder.toString());
         }
 
@@ -304,7 +310,7 @@ public class EmberNetworkInitialisation {
     private boolean doFormNetwork(int panId, ExtendedPanId extendedPanId, int channel) {
         EmberNetworkParameters networkParameters = new EmberNetworkParameters();
         networkParameters.setJoinMethod(EmberJoinMethod.EMBER_USE_MAC_ASSOCIATION);
-        networkParameters.setExtendedPanId(extendedPanId.getValue());
+        networkParameters.setExtendedPanId(extendedPanId);
         networkParameters.setPanId(panId);
         networkParameters.setRadioChannel(channel);
         EzspFormNetworkRequest formNetwork = new EzspFormNetworkRequest();

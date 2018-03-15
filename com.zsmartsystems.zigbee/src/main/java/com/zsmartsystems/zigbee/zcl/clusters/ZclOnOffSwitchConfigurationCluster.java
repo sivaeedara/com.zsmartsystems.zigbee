@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,10 +14,10 @@ import com.zsmartsystems.zigbee.zcl.ZclAttribute;
 import com.zsmartsystems.zigbee.zcl.ZclCluster;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclClusterType;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclDataType;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import javax.annotation.Generated;
 
 /**
  * <b>On/off Switch Configuration</b> cluster implementation (<i>Cluster ID 0x0007</i>).
@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
  * <p>
  * Code is auto-generated. Modifications may be overwritten!
  */
+@Generated(value = "com.zsmartsystems.zigbee.autocode.ZclProtocolCodeGenerator", date = "2018-03-12T23:36:29Z")
 public class ZclOnOffSwitchConfigurationCluster extends ZclCluster {
     /**
      * The ZigBee Cluster Library Cluster ID
@@ -68,7 +69,6 @@ public class ZclOnOffSwitchConfigurationCluster extends ZclCluster {
         super(zigbeeManager, zigbeeEndpoint, CLUSTER_ID, CLUSTER_NAME);
     }
 
-
     /**
      * Get the <i>SwitchType</i> attribute [attribute ID <b>0</b>].
      * <p>
@@ -83,7 +83,6 @@ public class ZclOnOffSwitchConfigurationCluster extends ZclCluster {
     public Future<CommandResult> getSwitchTypeAsync() {
         return read(attributes.get(ATTR_SWITCHTYPE));
     }
-
 
     /**
      * Synchronously get the <i>SwitchType</i> attribute [attribute ID <b>0</b>].
@@ -105,16 +104,12 @@ public class ZclOnOffSwitchConfigurationCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getSwitchType(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_SWITCHTYPE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_SWITCHTYPE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_SWITCHTYPE).getLastValue();
-            }
+        if (attributes.get(ATTR_SWITCHTYPE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_SWITCHTYPE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_SWITCHTYPE));
     }
-
 
     /**
      * Set the <i>SwitchActions</i> attribute [attribute ID <b>16</b>].
@@ -149,7 +144,6 @@ public class ZclOnOffSwitchConfigurationCluster extends ZclCluster {
         return read(attributes.get(ATTR_SWITCHACTIONS));
     }
 
-
     /**
      * Synchronously get the <i>SwitchActions</i> attribute [attribute ID <b>16</b>].
      * <p>
@@ -171,11 +165,8 @@ public class ZclOnOffSwitchConfigurationCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getSwitchActions(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_SWITCHACTIONS).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_SWITCHACTIONS).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_SWITCHACTIONS).getLastValue();
-            }
+        if (attributes.get(ATTR_SWITCHACTIONS).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_SWITCHACTIONS).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_SWITCHACTIONS));

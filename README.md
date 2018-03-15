@@ -33,7 +33,11 @@ echo 10c4 89fb > /sys/bus/usb-serial/drivers/cp210x/new_id
 ### ConBee / RaspBee
 
 The library supports the Dresden Electronics RaspBee and ConBee dongles. Note that this requires some further work.
- 
+
+### XBee
+
+The XBee S2C XStick is supported.
+
 ## Tested Hardware
  
 ## ZigBee Dongles and Chipsets
@@ -42,7 +46,7 @@ The following table provides a summary of some of the dongles / chipsets that ar
  
 | Model                 | Support         | Receive     | Transmit     | Antenna  |
 |-----------------------|-----------------|-------------|--------------|----------|
-| Xbee XU-Z11           | No              | -90dBm      | +4.5dBm      | Internal |
+| Xbee XU-Z11           | Yes             | -90dBm      | +4.5dBm      | Internal |
 | EM358                 | Yes (EZSP)      | -100dBm     | +8.0dBm      | Internal |
 | **EM358LR**           | Yes (EZSP)      | -103dBm     | **+20.0dBm** | Internal |
 | MGM111                | Yes (EZSP)      | -99dBm      | +10dBm       | Internal |
@@ -72,8 +76,12 @@ These provide minimal functionality and can be extended as required.
 
 # Contributing
 
+* Code style should use [standard naming conventions](https://www.thoughtco.com/using-java-naming-conventions-2034199)
 * Codacy static testing should pass.
+* Please consider raising issues before working on an enhancement to provide some coordination.
+* Keep PRs short - try and keep a single PR per enhancement. This makes tracking and reviewing easier.
 * Contributions must be supported with tests.
+* Code must be formatted using the Eclipse code formatter provided in the project.
 * Contributions must be your own and you must agree with the license.
 * You must sign the PR and commits and must agree to the [Contributor License Agreement](https://cla-assistant.io/zsmartsystems/com.zsmartsystems.zigbee).
  

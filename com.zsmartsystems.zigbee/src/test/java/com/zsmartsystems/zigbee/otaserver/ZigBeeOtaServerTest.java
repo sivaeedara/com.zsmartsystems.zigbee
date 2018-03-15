@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -101,7 +101,7 @@ public class ZigBeeOtaServerTest implements ZigBeeOtaStatusCallback {
         ZclOtaUpgradeCluster cluster = new ZclOtaUpgradeCluster(mockedNetworkManager, endpoint);
 
         ZigBeeOtaServer server = new ZigBeeOtaServer();
-        assertTrue(server.serverStartup(cluster));
+        assertTrue(server.appStartup(cluster));
         server.addListener(this);
 
         ZigBeeOtaFile otaFile = Mockito.mock(ZigBeeOtaFile.class);

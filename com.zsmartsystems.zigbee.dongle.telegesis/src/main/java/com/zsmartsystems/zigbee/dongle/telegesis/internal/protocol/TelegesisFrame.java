@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -196,6 +196,37 @@ public class TelegesisFrame {
         builder.append((char) buffer[position++]);
         builder.append((char) buffer[position++]);
         return Integer.parseInt(builder.toString(), 16);
+    }
+
+    /**
+     * Serializes an 32 bit long in hexadecimal (8 characters long)
+     *
+     * @param value the value to serialize
+     */
+    protected void serializeInt32(Long value) {
+        String strValue = Long.toHexString(value);
+
+        for (int cnt = strValue.length(); cnt < 8; cnt++) {
+            buffer[length++] = '0';
+        }
+        serializeUpperCaseString(strValue);
+    }
+
+    /**
+     * Deserializes an 32 bit long in hexadecimal
+     *
+     * @return the deserialized value
+     */
+    protected Long deserializeInt32() {
+        if (buffer.length < position + 8) {
+            return null;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for (int cnt = 0; cnt < 8; cnt++) {
+            builder.append((char) buffer[position++]);
+        }
+        return Long.parseLong(builder.toString(), 16);
     }
 
     /**

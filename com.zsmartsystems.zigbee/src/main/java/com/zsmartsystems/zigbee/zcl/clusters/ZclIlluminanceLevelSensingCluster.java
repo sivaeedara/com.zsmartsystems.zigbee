@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,10 +14,10 @@ import com.zsmartsystems.zigbee.zcl.ZclAttribute;
 import com.zsmartsystems.zigbee.zcl.ZclCluster;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclClusterType;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclDataType;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import javax.annotation.Generated;
 
 /**
  * <b>Illuminance level sensing</b> cluster implementation (<i>Cluster ID 0x0401</i>).
@@ -28,6 +28,7 @@ import java.util.concurrent.Future;
  * <p>
  * Code is auto-generated. Modifications may be overwritten!
  */
+@Generated(value = "com.zsmartsystems.zigbee.autocode.ZclProtocolCodeGenerator", date = "2018-03-12T23:36:29Z")
 public class ZclIlluminanceLevelSensingCluster extends ZclCluster {
     /**
      * The ZigBee Cluster Library Cluster ID
@@ -70,7 +71,6 @@ public class ZclIlluminanceLevelSensingCluster extends ZclCluster {
         super(zigbeeManager, zigbeeEndpoint, CLUSTER_ID, CLUSTER_NAME);
     }
 
-
     /**
      * Get the <i>LevelStatus</i> attribute [attribute ID <b>0</b>].
      * <p>
@@ -86,7 +86,6 @@ public class ZclIlluminanceLevelSensingCluster extends ZclCluster {
     public Future<CommandResult> getLevelStatusAsync() {
         return read(attributes.get(ATTR_LEVELSTATUS));
     }
-
 
     /**
      * Synchronously get the <i>LevelStatus</i> attribute [attribute ID <b>0</b>].
@@ -109,16 +108,12 @@ public class ZclIlluminanceLevelSensingCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getLevelStatus(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_LEVELSTATUS).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_LEVELSTATUS).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_LEVELSTATUS).getLastValue();
-            }
+        if (attributes.get(ATTR_LEVELSTATUS).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_LEVELSTATUS).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_LEVELSTATUS));
     }
-
 
     /**
      * Set reporting for the <i>LevelStatus</i> attribute [attribute ID <b>0</b>].
@@ -153,7 +148,6 @@ public class ZclIlluminanceLevelSensingCluster extends ZclCluster {
         return read(attributes.get(ATTR_LIGHTSENSORTYPE));
     }
 
-
     /**
      * Synchronously get the <i>LightSensorType</i> attribute [attribute ID <b>1</b>].
      * <p>
@@ -174,11 +168,8 @@ public class ZclIlluminanceLevelSensingCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getLightSensorType(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_LIGHTSENSORTYPE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_LIGHTSENSORTYPE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_LIGHTSENSORTYPE).getLastValue();
-            }
+        if (attributes.get(ATTR_LIGHTSENSORTYPE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_LIGHTSENSORTYPE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_LIGHTSENSORTYPE));

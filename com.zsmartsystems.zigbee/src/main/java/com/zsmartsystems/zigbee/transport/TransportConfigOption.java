@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,17 @@ public enum TransportConfigOption {
      * Defines the concentrator type.
      * <p>
      * Value must be one of {@link ConcentratorType}.
+     *
+     * @deprecated use CONCENTRATOR_CONFIG
      */
     CONCENTRATOR_TYPE,
+
+    /**
+     * Defines the concentrator type.
+     * <p>
+     * Value must be one of {@link ConcentratorConfigs}.
+     */
+    CONCENTRATOR_CONFIG,
 
     /**
      * Configures the trust centre join mode.

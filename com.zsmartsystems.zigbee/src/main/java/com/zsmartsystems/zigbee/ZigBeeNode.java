@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,11 @@ import java.util.concurrent.RunnableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zsmartsystems.zigbee.dao.ZigBeeEndpointDao;
+import com.zsmartsystems.zigbee.dao.ZigBeeNodeDao;
 import com.zsmartsystems.zigbee.internal.NotificationService;
+import com.zsmartsystems.zigbee.internal.ZigBeeNodeServiceDiscoverer;
+import com.zsmartsystems.zigbee.internal.ZigBeeNodeServiceDiscoverer.NodeDiscoveryTask;
 import com.zsmartsystems.zigbee.zcl.ZclCommand;
 import com.zsmartsystems.zigbee.zdo.ZdoStatus;
 import com.zsmartsystems.zigbee.zdo.command.ManagementBindRequest;
@@ -39,6 +43,7 @@ import com.zsmartsystems.zigbee.zdo.field.NodeDescriptor.LogicalType;
 import com.zsmartsystems.zigbee.zdo.field.NodeDescriptor.MacCapabilitiesType;
 import com.zsmartsystems.zigbee.zdo.field.NodeDescriptor.ServerCapabilitiesType;
 import com.zsmartsystems.zigbee.zdo.field.PowerDescriptor;
+import com.zsmartsystems.zigbee.zdo.field.PowerDescriptor.CurrentPowerModeType;
 import com.zsmartsystems.zigbee.zdo.field.RoutingTable;
 
 /**
@@ -57,7 +62,7 @@ public class ZigBeeNode implements ZigBeeCommandListener {
     /**
      * The extended {@link IeeeAddress} for the node
      */
-    private final IeeeAddress ieeeAddress;
+    private IeeeAddress ieeeAddress;
 
     /**
      * The 16 bit network address for the node
@@ -73,11 +78,6 @@ public class ZigBeeNode implements ZigBeeCommandListener {
      * The {@link PowerDescriptor} for the node
      */
     private PowerDescriptor powerDescriptor = new PowerDescriptor();
-
-    /**
-     * A flag indicating if this node is configured to allow joining
-     */
-    private boolean joiningEnabled = false;
 
     /**
      * The time the node information was last updated. This is set from the mesh update class when it the
@@ -111,6 +111,12 @@ public class ZigBeeNode implements ZigBeeCommandListener {
     private final Map<Integer, ZigBeeEndpoint> endpoints = new ConcurrentHashMap<Integer, ZigBeeEndpoint>();
 
     /**
+     * The node service discoverer that is responsible for the discovery of services, and periodic update or routes and
+     * Neighbors
+     */
+    private final ZigBeeNodeServiceDiscoverer serviceDiscoverer;
+
+    /**
      * The endpoint listeners of the ZigBee network. Registered listeners will be
      * notified of additions, deletions and changes to {@link ZigBeeEndpoint}s.
      */
@@ -136,6 +142,7 @@ public class ZigBeeNode implements ZigBeeCommandListener {
 
         this.networkManager = networkManager;
         this.ieeeAddress = ieeeAddress;
+        this.serviceDiscoverer = new ZigBeeNodeServiceDiscoverer(networkManager, this);
 
         networkManager.addCommandListener(this);
     }
@@ -587,30 +594,6 @@ public class ZigBeeNode implements ZigBeeCommandListener {
     }
 
     /**
-     * Sets the joining status of this node. Note that this is not (currently) linked to the join command that is sent -
-     * it is a status point that is set from the node beacons.
-     *
-     * @return true if the joining status changed.
-     */
-    public boolean setJoining(boolean joiningEnabled) {
-        boolean changed;
-
-        changed = this.joiningEnabled != joiningEnabled;
-        this.joiningEnabled = joiningEnabled;
-        return changed;
-    }
-
-    /**
-     * Gets the joining status of this node. Note that this is not (currently) linked to the join command that is sent -
-     * it is a status point that is set from the node beacons.
-     *
-     * @return true if the node is currently configured to allow joining
-     */
-    public boolean isJoiningEnabled() {
-        return joiningEnabled;
-    }
-
-    /**
      * Sets the last update time to the current time.
      * This should be set when important node information is updated such as route tables, neighbor information etc
      */
@@ -649,7 +632,7 @@ public class ZigBeeNode implements ZigBeeCommandListener {
             boolean matched = false;
             for (ZigBeeEndpoint endpoint : endpoints.values()) {
                 for (int clusterId : matchRequest.getInClusterList()) {
-                    if (endpoint.getExtension(clusterId) != null) {
+                    if (endpoint.getApplication(clusterId) != null) {
                         matched = true;
                         break;
                     }
@@ -686,6 +669,56 @@ public class ZigBeeNode implements ZigBeeCommandListener {
         }
 
         endpoint.commandReceived(zclCommand);
+    }
+
+    /**
+     * Starts service discovery for the node.
+     */
+    public void startDiscovery() {
+        Set<NodeDiscoveryTask> tasks = new HashSet<NodeDiscoveryTask>();
+
+        // Always request the network address - in case it's changed
+        tasks.add(NodeDiscoveryTask.NWK_ADDRESS);
+
+        if (nodeDescriptor.getLogicalType() == LogicalType.UNKNOWN) {
+            tasks.add(NodeDiscoveryTask.NODE_DESCRIPTOR);
+        }
+
+        if (powerDescriptor.getCurrentPowerMode() == CurrentPowerModeType.UNKNOWN) {
+            tasks.add(NodeDiscoveryTask.POWER_DESCRIPTOR);
+        }
+
+        if (endpoints.size() == 0 && networkAddress != 0) {
+            tasks.add(NodeDiscoveryTask.ACTIVE_ENDPOINTS);
+        }
+
+        tasks.add(NodeDiscoveryTask.NEIGHBORS);
+
+        serviceDiscoverer.startDiscovery(tasks);
+    }
+
+    /**
+     * Starts service discovery for the node in order to update the mesh
+     */
+    public void updateMesh() {
+        Set<NodeDiscoveryTask> tasks = new HashSet<NodeDiscoveryTask>();
+
+        tasks.add(NodeDiscoveryTask.NEIGHBORS);
+
+        if (nodeDescriptor.getLogicalType() != LogicalType.END_DEVICE) {
+            // tasks.add(NodeDiscoveryTask.ROUTES);
+        }
+
+        serviceDiscoverer.startDiscovery(tasks);
+    }
+
+    /**
+     * Checks if basic device discovery is complete.
+     *
+     * @return true if basic device information is known
+     */
+    public boolean isDiscovered() {
+        return nodeDescriptor.getLogicalType() != LogicalType.UNKNOWN && endpoints.size() != 0;
     }
 
     /**
@@ -752,6 +785,45 @@ public class ZigBeeNode implements ZigBeeCommandListener {
         // TODO: How to deal with endpoints
 
         return updated;
+    }
+
+    /**
+     * Gets a {@link ZigBeeNodeDao} representing the node
+     *
+     * @return the {@link ZigBeeNodeDao}
+     */
+    public ZigBeeNodeDao getDao() {
+        ZigBeeNodeDao dao = new ZigBeeNodeDao();
+
+        dao.setIeeeAddress(ieeeAddress.toString());
+        dao.setNetworkAddress(networkAddress);
+        dao.setNodeDescriptor(nodeDescriptor);
+        dao.setPowerDescriptor(powerDescriptor);
+        dao.setBindingTable(bindingTable);
+
+        List<ZigBeeEndpointDao> endpointDaoList = new ArrayList<ZigBeeEndpointDao>();
+        for (ZigBeeEndpoint endpoint : endpoints.values()) {
+            endpointDaoList.add(endpoint.getDao());
+        }
+        dao.setEndpoints(endpointDaoList);
+
+        return dao;
+    }
+
+    public void setDao(ZigBeeNodeDao dao) {
+        ieeeAddress = new IeeeAddress(dao.getIeeeAddress());
+        networkAddress = dao.getNetworkAddress();
+        nodeDescriptor = dao.getNodeDescriptor();
+        powerDescriptor = dao.getPowerDescriptor();
+        if (dao.getBindingTable() != null) {
+            bindingTable.addAll(dao.getBindingTable());
+        }
+
+        for (ZigBeeEndpointDao endpointDao : dao.getEndpoints()) {
+            ZigBeeEndpoint endpoint = new ZigBeeEndpoint(networkManager, this, endpointDao.getEndpointId());
+            endpoint.setDao(endpointDao);
+            endpoints.put(endpoint.getEndpointId(), endpoint);
+        }
     }
 
     @Override

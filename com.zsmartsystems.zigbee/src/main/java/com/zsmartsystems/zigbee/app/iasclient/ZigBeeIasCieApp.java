@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -149,7 +149,7 @@ public class ZigBeeIasCieApp implements ZigBeeApplication {
     }
 
     @Override
-    public boolean serverStartup(ZclCluster cluster) {
+    public boolean appStartup(ZclCluster cluster) {
         iasZoneCluster = (ZclIasZoneCluster) cluster;
 
         Integer currentState = iasZoneCluster.getZoneState(0);
@@ -177,7 +177,7 @@ public class ZigBeeIasCieApp implements ZigBeeApplication {
     }
 
     @Override
-    public void serverShutdown() {
+    public void appShutdown() {
         // Nothing to do
     }
 

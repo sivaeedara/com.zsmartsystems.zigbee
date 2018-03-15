@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,9 +23,12 @@ import com.zsmartsystems.zigbee.dongle.cc2531.ZigBeeDongleTiCc2531;
 import com.zsmartsystems.zigbee.dongle.conbee.ZigBeeDongleConBee;
 import com.zsmartsystems.zigbee.dongle.ember.ZigBeeDongleEzsp;
 import com.zsmartsystems.zigbee.dongle.telegesis.ZigBeeDongleTelegesis;
+import com.zsmartsystems.zigbee.dongle.xbee.ZigBeeDongleXBee;
 import com.zsmartsystems.zigbee.serial.ZigBeeSerialPort;
 import com.zsmartsystems.zigbee.serialization.DefaultDeserializer;
 import com.zsmartsystems.zigbee.serialization.DefaultSerializer;
+import com.zsmartsystems.zigbee.transport.ConcentratorConfig;
+import com.zsmartsystems.zigbee.transport.ConcentratorType;
 import com.zsmartsystems.zigbee.transport.TransportConfig;
 import com.zsmartsystems.zigbee.transport.TransportConfigOption;
 import com.zsmartsystems.zigbee.transport.ZigBeePort;
@@ -118,6 +121,18 @@ public class ZigBeeConsoleMain {
             dongle = new ZigBeeDongleTiCc2531(serialPort);
         } else if (dongleName.toUpperCase().equals("EMBER")) {
             dongle = new ZigBeeDongleEzsp(serialPort);
+
+            // Configure the concentrator
+            // Max Hops defaults to system max
+            ConcentratorConfig concentratorConfig = new ConcentratorConfig();
+            concentratorConfig.setType(ConcentratorType.LOW_RAM);
+            concentratorConfig.setMaxFailures(8);
+            concentratorConfig.setMaxHops(0);
+            concentratorConfig.setRefreshMinimum(60);
+            concentratorConfig.setRefreshMaximum(3600);
+            transportOptions.addOption(TransportConfigOption.CONCENTRATOR_CONFIG, concentratorConfig);
+        } else if (dongleName.toUpperCase().equals("XBEE")) {
+            dongle = new ZigBeeDongleXBee(serialPort);
         } else if (dongleName.toUpperCase().equals("CONBEE")) {
             dongle = new ZigBeeDongleConBee(serialPort);
         } else if (dongleName.toUpperCase().equals("TELEGESIS")) {
@@ -128,6 +143,7 @@ public class ZigBeeConsoleMain {
             Set<Integer> clusters = new HashSet<Integer>();
             clusters.add(ZclIasZoneCluster.CLUSTER_ID);
             transportOptions.addOption(TransportConfigOption.SUPPORTED_OUTPUT_CLUSTERS, clusters);
+            // transportOptions.addOption(TransportConfigOption.SECURITY_FRAME_COUNTER, 0x8000L);
         } else {
             dongle = null;
         }
@@ -140,7 +156,10 @@ public class ZigBeeConsoleMain {
 
         ZigBeeNetworkManager networkManager = new ZigBeeNetworkManager(dongle);
 
-        ZigBeeNetworkStateSerializer networkStateSerializer = new ZigBeeNetworkStateSerializerImpl();
+        ZigBeeNetworkStateSerializer networkStateSerializer = new ZigBeeNetworkStateSerializerImpl(dongleName);
+        if (resetNetwork) {
+            // networkStateSerializer.remove();
+        }
         networkManager.setNetworkStateSerializer(networkStateSerializer);
         networkManager.setSerializer(DefaultSerializer.class, DefaultDeserializer.class);
         final ZigBeeConsole console = new ZigBeeConsole(networkManager, dongle);

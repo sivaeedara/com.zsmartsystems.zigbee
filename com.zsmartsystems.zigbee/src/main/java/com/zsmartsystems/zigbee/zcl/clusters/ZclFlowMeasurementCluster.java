@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,10 +14,10 @@ import com.zsmartsystems.zigbee.zcl.ZclAttribute;
 import com.zsmartsystems.zigbee.zcl.ZclCluster;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclClusterType;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclDataType;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import javax.annotation.Generated;
 
 /**
  * <b>Flow measurement</b> cluster implementation (<i>Cluster ID 0x0404</i>).
@@ -27,6 +27,7 @@ import java.util.concurrent.Future;
  * <p>
  * Code is auto-generated. Modifications may be overwritten!
  */
+@Generated(value = "com.zsmartsystems.zigbee.autocode.ZclProtocolCodeGenerator", date = "2018-03-12T23:36:29Z")
 public class ZclFlowMeasurementCluster extends ZclCluster {
     /**
      * The ZigBee Cluster Library Cluster ID
@@ -99,7 +100,6 @@ public class ZclFlowMeasurementCluster extends ZclCluster {
         super(zigbeeManager, zigbeeEndpoint, CLUSTER_ID, CLUSTER_NAME);
     }
 
-
     /**
      * Get the <i>MeasuredValue</i> attribute [attribute ID <b>0</b>].
      * <p>
@@ -127,7 +127,6 @@ public class ZclFlowMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getMeasuredValueAsync() {
         return read(attributes.get(ATTR_MEASUREDVALUE));
     }
-
 
     /**
      * Synchronously get the <i>MeasuredValue</i> attribute [attribute ID <b>0</b>].
@@ -162,16 +161,12 @@ public class ZclFlowMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getMeasuredValue(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_MEASUREDVALUE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_MEASUREDVALUE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_MEASUREDVALUE).getLastValue();
-            }
+        if (attributes.get(ATTR_MEASUREDVALUE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_MEASUREDVALUE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_MEASUREDVALUE));
     }
-
 
     /**
      * Set reporting for the <i>MeasuredValue</i> attribute [attribute ID <b>0</b>].
@@ -220,7 +215,6 @@ public class ZclFlowMeasurementCluster extends ZclCluster {
         return read(attributes.get(ATTR_MINMEASUREDVALUE));
     }
 
-
     /**
      * Synchronously get the <i>MinMeasuredValue</i> attribute [attribute ID <b>1</b>].
      * <p>
@@ -242,11 +236,8 @@ public class ZclFlowMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getMinMeasuredValue(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_MINMEASUREDVALUE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_MINMEASUREDVALUE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_MINMEASUREDVALUE).getLastValue();
-            }
+        if (attributes.get(ATTR_MINMEASUREDVALUE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_MINMEASUREDVALUE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_MINMEASUREDVALUE));
@@ -271,7 +262,6 @@ public class ZclFlowMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getMaxMeasuredValueAsync() {
         return read(attributes.get(ATTR_MAXMEASUREDVALUE));
     }
-
 
     /**
      * Synchronously get the <i>MaxMeasuredValue</i> attribute [attribute ID <b>2</b>].
@@ -298,11 +288,8 @@ public class ZclFlowMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getMaxMeasuredValue(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_MAXMEASUREDVALUE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_MAXMEASUREDVALUE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_MAXMEASUREDVALUE).getLastValue();
-            }
+        if (attributes.get(ATTR_MAXMEASUREDVALUE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_MAXMEASUREDVALUE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_MAXMEASUREDVALUE));
@@ -324,7 +311,6 @@ public class ZclFlowMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getToleranceAsync() {
         return read(attributes.get(ATTR_TOLERANCE));
     }
-
 
     /**
      * Synchronously get the <i>Tolerance</i> attribute [attribute ID <b>3</b>].
@@ -348,16 +334,12 @@ public class ZclFlowMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getTolerance(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_TOLERANCE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_TOLERANCE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_TOLERANCE).getLastValue();
-            }
+        if (attributes.get(ATTR_TOLERANCE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_TOLERANCE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_TOLERANCE));
     }
-
 
     /**
      * Set reporting for the <i>Tolerance</i> attribute [attribute ID <b>3</b>].

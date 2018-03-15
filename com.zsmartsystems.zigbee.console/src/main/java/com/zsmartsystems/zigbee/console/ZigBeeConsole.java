@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import com.zsmartsystems.zigbee.ZigBeeNetworkManager;
 import com.zsmartsystems.zigbee.ZigBeeNetworkNodeListener;
 import com.zsmartsystems.zigbee.ZigBeeNetworkStateListener;
 import com.zsmartsystems.zigbee.ZigBeeNode;
+import com.zsmartsystems.zigbee.ZigBeeProfileType;
 import com.zsmartsystems.zigbee.app.iasclient.ZigBeeIasCieApp;
 import com.zsmartsystems.zigbee.app.otaserver.ZigBeeOtaFile;
 import com.zsmartsystems.zigbee.app.otaserver.ZigBeeOtaServer;
@@ -212,11 +213,11 @@ public final class ZigBeeConsole {
                 ZigBeeNode coordinator = networkManager.getNode(0);
                 for (ZigBeeEndpoint endpoint : node.getEndpoints()) {
                     if (endpoint.getInputCluster(ZclIasZoneCluster.CLUSTER_ID) != null) {
-                        endpoint.addExtension(new ZigBeeIasCieApp(coordinator.getIeeeAddress(), 0));
+                        endpoint.addApplication(new ZigBeeIasCieApp(coordinator.getIeeeAddress(), 0));
                         break;
                     }
                     if (endpoint.getInputCluster(ZclOtaUpgradeCluster.CLUSTER_ID) != null) {
-                        endpoint.addExtension(new ZigBeeOtaServer());
+                        endpoint.addApplication(new ZigBeeOtaServer());
                         break;
                     }
                 }
@@ -633,27 +634,26 @@ public final class ZigBeeConsole {
                 return false;
             }
 
-            final ZigBeeEndpoint device = getDevice(zigbeeApi, args[1]);
-
-            if (device == null) {
+            final ZigBeeEndpoint endpoint = getDevice(zigbeeApi, args[1]);
+            if (endpoint == null) {
                 return false;
             }
 
-            print("IEEE Address     : " + device.getParentNode().getIeeeAddress(), out);
-            print("Network Address  : " + device.getParentNode().getNetworkAddress(), out);
-            print("Endpoint         : " + device.getEndpointId(), out);
-            // print("Device Profile : " + ZigBeeApiConstants.getProfileName(device.getProfileId())
-            // + String.format(" (0x%04X)", device.getProfileId()), out);
+            print("IEEE Address     : " + endpoint.getParentNode().getIeeeAddress(), out);
+            print("Network Address  : " + endpoint.getParentNode().getNetworkAddress(), out);
+            print("Endpoint         : " + endpoint.getEndpointId(), out);
+            print("Device Profile : " + ZigBeeProfileType.getProfileType(endpoint.getProfileId())
+                    + String.format(" (0x%04X)", endpoint.getProfileId()), out);
             // print("Device Category : "
             // + ZigBeeApiConstants.getCategoryDeviceName(device.getProfileId(), device.getDeviceId())
             // + String.format(" (0x%04X)", device.getDeviceId()), out);
             // print("Device Type : " + ZigBeeApiConstants.getDeviceName(device.getProfileId(), device.getDeviceId()),
             // out);
-            print("Device Version   : " + device.getDeviceVersion(), out);
+            print("Device Version   : " + endpoint.getDeviceVersion(), out);
             print("Input Clusters   : ", out);
-            printClusters(device, device.getInputClusterIds(), true, out);
+            printClusters(endpoint, endpoint.getInputClusterIds(), true, out);
             print("Output Clusters  : ", out);
-            printClusters(device, device.getOutputClusterIds(), false, out);
+            printClusters(endpoint, endpoint.getOutputClusterIds(), false, out);
 
             return true;
         }
@@ -1565,12 +1565,12 @@ public final class ZigBeeConsole {
             }
 
             // Check if the OTA server is already set
-            ZigBeeOtaServer otaServer = (ZigBeeOtaServer) endpoint.getExtension(ZclOtaUpgradeCluster.CLUSTER_ID);
+            ZigBeeOtaServer otaServer = (ZigBeeOtaServer) endpoint.getApplication(ZclOtaUpgradeCluster.CLUSTER_ID);
             if (otaServer == null) {
                 // Create and add the server
                 otaServer = new ZigBeeOtaServer();
 
-                endpoint.addExtension(otaServer);
+                endpoint.addApplication(otaServer);
 
                 otaServer.addListener(new ZigBeeOtaStatusCallback() {
                     @Override
@@ -2337,7 +2337,7 @@ public final class ZigBeeConsole {
          */
         @Override
         public String getSyntax() {
-            return "info node [MANUFACTURER|APPVERSION|MODEL|APPVERSION|STKVERSION|HWVERSION|ZCLVERSION|DATE]";
+            return "info node [MANUFACTURER|APPVERSION|MODEL|APPVERSION|STKVERSION|HWVERSION|ZCLVERSION|DATE] [REFRESH]";
         }
 
         /**
@@ -2345,11 +2345,20 @@ public final class ZigBeeConsole {
          */
         @Override
         public boolean process(final ZigBeeApi zigbeeApi, final String[] args, PrintStream out) throws Exception {
-            if (args.length != 3) {
+            if (args.length < 3) {
                 return false;
             }
 
+            long refresh = Long.MAX_VALUE;
+            if (args.length == 4) {
+                refresh = 0;
+            }
+
             final ZigBeeEndpoint device = getDevice(zigbeeApi, args[1]);
+            if (device == null) {
+                print("Can't find endpoint " + args[1], out);
+                return false;
+            }
             final String command = args[2].toUpperCase();
 
             ZclBasicCluster basicCluster = (ZclBasicCluster) device.getCluster(0);
@@ -2361,25 +2370,25 @@ public final class ZigBeeConsole {
             String response = null;
             switch (command) {
                 case "MANUFACTURER":
-                    response = basicCluster.getManufacturerName(Long.MAX_VALUE);
+                    response = basicCluster.getManufacturerName(refresh);
                     break;
                 case "MODEL":
-                    response = basicCluster.getModelIdentifier(Long.MAX_VALUE);
+                    response = basicCluster.getModelIdentifier(refresh);
                     break;
                 case "APPVERSION":
-                    response = basicCluster.getApplicationVersion(Long.MAX_VALUE).toString();
+                    response = basicCluster.getApplicationVersion(refresh).toString();
                     break;
                 case "STKVERSION":
-                    response = basicCluster.getStackVersion(Long.MAX_VALUE).toString();
+                    response = basicCluster.getStackVersion(refresh).toString();
                     break;
                 case "ZCLVERSION":
-                    response = basicCluster.getZclVersion(Long.MAX_VALUE).toString();
+                    response = basicCluster.getZclVersion(refresh).toString();
                     break;
                 case "HWVERSION":
-                    response = basicCluster.getHwVersion(Long.MAX_VALUE).toString();
+                    response = basicCluster.getHwVersion(refresh).toString();
                     break;
                 case "DATE":
-                    response = basicCluster.getDateCode(Long.MAX_VALUE).toString();
+                    response = basicCluster.getDateCode(refresh).toString();
                     break;
                 default:
                     print("Unknown info type: " + command, out);

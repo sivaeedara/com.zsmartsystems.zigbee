@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,8 @@
 package com.zsmartsystems.zigbee.zcl.protocol;
 
 import java.lang.reflect.Constructor;
+
+import javax.annotation.Generated;
 
 import com.zsmartsystems.zigbee.zcl.ZclCommand;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclCommandDirection;
@@ -42,6 +44,9 @@ import com.zsmartsystems.zigbee.zcl.clusters.scenes.GetSceneMembershipCommand;
 import com.zsmartsystems.zigbee.zcl.clusters.onoff.OffCommand;
 import com.zsmartsystems.zigbee.zcl.clusters.onoff.OnCommand;
 import com.zsmartsystems.zigbee.zcl.clusters.onoff.ToggleCommand;
+import com.zsmartsystems.zigbee.zcl.clusters.onoff.OffWithEffectCommand;
+import com.zsmartsystems.zigbee.zcl.clusters.onoff.OnWithRecallGlobalSceneCommand;
+import com.zsmartsystems.zigbee.zcl.clusters.onoff.OnWithTimedOffCommand;
 import com.zsmartsystems.zigbee.zcl.clusters.levelcontrol.MoveToLevelCommand;
 import com.zsmartsystems.zigbee.zcl.clusters.levelcontrol.MoveCommand;
 import com.zsmartsystems.zigbee.zcl.clusters.levelcontrol.StepCommand;
@@ -162,6 +167,7 @@ import com.zsmartsystems.zigbee.zcl.clusters.general.DiscoverAttributesExtendedR
  *
  * @author Chris Jackson
  */
+@Generated(value = "com.zsmartsystems.zigbee.autocode.ZclProtocolCodeGenerator", date = "2018-03-12T23:36:29Z")
 public enum ZclCommandType {
     /**
      * ADD_GROUP_COMMAND: Add Group Command
@@ -584,11 +590,29 @@ public enum ZclCommandType {
      */
     OFF_COMMAND(0x0006, 0, OffCommand.class, ZclCommandDirection.CLIENT_TO_SERVER),
     /**
+     * OFF_WITH_EFFECT_COMMAND: Off With Effect Command
+     * <p>
+     * See {@link OffWithEffectCommand}
+     */
+    OFF_WITH_EFFECT_COMMAND(0x0006, 64, OffWithEffectCommand.class, ZclCommandDirection.CLIENT_TO_SERVER),
+    /**
      * ON_COMMAND: On Command
      * <p>
      * See {@link OnCommand}
      */
     ON_COMMAND(0x0006, 1, OnCommand.class, ZclCommandDirection.CLIENT_TO_SERVER),
+    /**
+     * ON_WITH_RECALL_GLOBAL_SCENE_COMMAND: On With Recall Global Scene Command
+     * <p>
+     * See {@link OnWithRecallGlobalSceneCommand}
+     */
+    ON_WITH_RECALL_GLOBAL_SCENE_COMMAND(0x0006, 65, OnWithRecallGlobalSceneCommand.class, ZclCommandDirection.CLIENT_TO_SERVER),
+    /**
+     * ON_WITH_TIMED_OFF_COMMAND: On With Timed Off Command
+     * <p>
+     * See {@link OnWithTimedOffCommand}
+     */
+    ON_WITH_TIMED_OFF_COMMAND(0x0006, 66, OnWithTimedOffCommand.class, ZclCommandDirection.CLIENT_TO_SERVER),
     /**
      * PANIC_COMMAND: Panic Command
      * <p>

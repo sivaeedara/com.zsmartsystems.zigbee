@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ import java.util.Objects;
  * @author Chris Jackson
  *
  */
-public class IeeeAddress implements Comparable {
+public class IeeeAddress implements Comparable<IeeeAddress> {
     private int[] address;
 
     /**
@@ -113,14 +113,13 @@ public class IeeeAddress implements Comparable {
     }
 
     @Override
-    public int compareTo(Object object) {
-        if (object == null) {
+    public int compareTo(IeeeAddress other) {
+        if (other == null) {
             return -1;
         }
-        if (!IeeeAddress.class.isAssignableFrom(object.getClass())) {
+        if (!IeeeAddress.class.isAssignableFrom(other.getClass())) {
             return -1;
         }
-        final IeeeAddress other = (IeeeAddress) object;
         for (int cnt = 0; cnt < 8; cnt++) {
             if (other.getValue()[cnt] == address[cnt]) {
                 continue;

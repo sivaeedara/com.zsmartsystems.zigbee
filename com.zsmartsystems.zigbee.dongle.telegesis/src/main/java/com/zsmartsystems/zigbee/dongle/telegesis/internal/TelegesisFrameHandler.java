@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -105,8 +105,14 @@ public class TelegesisFrameHandler {
      */
     private final int DEFAULT_COMMAND_TIMEOUT = 10000;
 
+    /**
+     * The maximum number of milliseconds to wait for the response from the stick once the request was sent
+     */
     private int transactionTimeout = DEFAULT_TRANSACTION_TIMEOUT;
 
+    /**
+     * The maximum number of milliseconds to wait for the completion of the transaction after it's queued
+     */
     private int commandTimeout = DEFAULT_COMMAND_TIMEOUT;
 
     enum RxStateMachine {
@@ -150,7 +156,7 @@ public class TelegesisFrameHandler {
                         for (int value : responseData) {
                             builder.append(String.format(" %02X", value));
                         }
-                        logger.debug("TELEGESIS RX: Data{}", builder.toString());
+                        logger.debug("RX Telegesis Data:{}", builder.toString());
 
                         // Use the Event Factory to get an event
                         TelegesisEvent event = TelegesisEventFactory.getTelegesisFrame(responseData);
@@ -210,7 +216,7 @@ public class TelegesisFrameHandler {
                 logger.debug("TELEGESIS RX buffer overrun - resetting!");
             }
 
-            logger.trace("TELEGESIS RX: {}", String.format("%02X %c", val, val));
+            logger.trace("RX Telegesis: {}", String.format("%02X %c", val, val));
 
             switch (rxState) {
                 case WAITING:
@@ -331,7 +337,7 @@ public class TelegesisFrameHandler {
                 builder.append(String.format(" %02X", sendByte));
                 serialPort.write(sendByte);
             }
-            logger.debug("TELEGESIS TX: Data{}", builder.toString());
+            logger.debug("TX Telegesis Data:{}", builder.toString());
 
             // Start the timeout
             startTimer();
@@ -361,7 +367,7 @@ public class TelegesisFrameHandler {
     private boolean notifyTransactionComplete(final TelegesisCommand response) {
         boolean processed = false;
 
-        logger.debug("Telegesis command complete: {}", response);
+        logger.debug("RX Telegesis: {}", response);
         synchronized (transactionListeners) {
             for (TelegesisListener listener : transactionListeners) {
                 try {
@@ -419,7 +425,7 @@ public class TelegesisFrameHandler {
      * @param response the {@link TelegesisEvent} received
      */
     private void notifyEventReceived(final TelegesisEvent event) {
-        logger.debug("Telegesis event received: {}", event);
+        logger.debug("RX Telegesis: {}", event);
         synchronized (eventListeners) {
             for (TelegesisEventListener listener : eventListeners) {
                 try {
@@ -585,7 +591,7 @@ public class TelegesisFrameHandler {
     public TelegesisEvent eventWait(final Class<?> eventClass) {
         Future<TelegesisEvent> future = waitEventAsync(eventClass);
         try {
-            return future.get(transactionTimeout, TimeUnit.MILLISECONDS);
+            return future.get(commandTimeout, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.debug("Telegesis interrupted in eventWait {}", eventClass);
             future.cancel(true);

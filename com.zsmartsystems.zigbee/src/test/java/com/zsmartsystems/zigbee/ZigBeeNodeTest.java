@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -220,14 +220,6 @@ public class ZigBeeNodeTest {
     }
 
     @Test
-    public void testJoiningEnabled() {
-        ZigBeeNode node = new ZigBeeNode(Mockito.mock(ZigBeeNetworkManager.class), new IeeeAddress());
-
-        node.setJoining(true);
-        assertTrue(node.isJoiningEnabled());
-    }
-
-    @Test
     public void testAssociatedDevices() {
         ZigBeeNode node = new ZigBeeNode(Mockito.mock(ZigBeeNetworkManager.class), new IeeeAddress());
 
@@ -371,5 +363,18 @@ public class ZigBeeNodeTest {
         assertEquals(2, node.getNeighbors().size());
         assertTrue(node.setNeighbors(null));
         assertEquals(0, node.getNeighbors().size());
+    }
+
+    @Test
+    public void isDiscovered() {
+        ZigBeeNode node = new ZigBeeNode(Mockito.mock(ZigBeeNetworkManager.class), new IeeeAddress("1234567890"));
+        assertFalse(node.isDiscovered());
+
+        NodeDescriptor descriptor = new NodeDescriptor(0, 3333, 74, true, 6666, 0, 6, 4444, true, 8);
+        node.setNodeDescriptor(descriptor);
+        assertFalse(node.isDiscovered());
+
+        node.addEndpoint(new ZigBeeEndpoint(Mockito.mock(ZigBeeNetworkManager.class), node, 1));
+        assertTrue(node.isDiscovered());
     }
 }

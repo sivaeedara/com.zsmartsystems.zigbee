@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,10 +30,10 @@ import com.zsmartsystems.zigbee.zcl.clusters.colorcontrol.StepHueCommand;
 import com.zsmartsystems.zigbee.zcl.clusters.colorcontrol.StepSaturationCommand;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclClusterType;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclDataType;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import javax.annotation.Generated;
 
 /**
  * <b>Color control</b> cluster implementation (<i>Cluster ID 0x0300</i>).
@@ -45,6 +45,7 @@ import java.util.concurrent.Future;
  * <p>
  * Code is auto-generated. Modifications may be overwritten!
  */
+@Generated(value = "com.zsmartsystems.zigbee.autocode.ZclProtocolCodeGenerator", date = "2018-03-12T23:36:29Z")
 public class ZclColorControlCluster extends ZclCluster {
     /**
      * The ZigBee Cluster Library Cluster ID
@@ -238,7 +239,6 @@ public class ZclColorControlCluster extends ZclCluster {
         super(zigbeeManager, zigbeeEndpoint, CLUSTER_ID, CLUSTER_NAME);
     }
 
-
     /**
      * Get the <i>CurrentHue</i> attribute [attribute ID <b>0</b>].
      * <p>
@@ -260,7 +260,6 @@ public class ZclColorControlCluster extends ZclCluster {
     public Future<CommandResult> getCurrentHueAsync() {
         return read(attributes.get(ATTR_CURRENTHUE));
     }
-
 
     /**
      * Synchronously get the <i>CurrentHue</i> attribute [attribute ID <b>0</b>].
@@ -289,16 +288,12 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getCurrentHue(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_CURRENTHUE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_CURRENTHUE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_CURRENTHUE).getLastValue();
-            }
+        if (attributes.get(ATTR_CURRENTHUE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_CURRENTHUE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_CURRENTHUE));
     }
-
 
     /**
      * Set reporting for the <i>CurrentHue</i> attribute [attribute ID <b>0</b>].
@@ -346,7 +341,6 @@ public class ZclColorControlCluster extends ZclCluster {
         return read(attributes.get(ATTR_CURRENTSATURATION));
     }
 
-
     /**
      * Synchronously get the <i>CurrentSaturation</i> attribute [attribute ID <b>1</b>].
      * <p>
@@ -373,16 +367,12 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getCurrentSaturation(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_CURRENTSATURATION).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_CURRENTSATURATION).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_CURRENTSATURATION).getLastValue();
-            }
+        if (attributes.get(ATTR_CURRENTSATURATION).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_CURRENTSATURATION).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_CURRENTSATURATION));
     }
-
 
     /**
      * Set reporting for the <i>CurrentSaturation</i> attribute [attribute ID <b>1</b>].
@@ -424,7 +414,6 @@ public class ZclColorControlCluster extends ZclCluster {
         return read(attributes.get(ATTR_REMAININGTIME));
     }
 
-
     /**
      * Synchronously get the <i>RemainingTime</i> attribute [attribute ID <b>2</b>].
      * <p>
@@ -446,11 +435,8 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getRemainingTime(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_REMAININGTIME).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_REMAININGTIME).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_REMAININGTIME).getLastValue();
-            }
+        if (attributes.get(ATTR_REMAININGTIME).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_REMAININGTIME).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_REMAININGTIME));
@@ -476,7 +462,6 @@ public class ZclColorControlCluster extends ZclCluster {
     public Future<CommandResult> getCurrentXAsync() {
         return read(attributes.get(ATTR_CURRENTX));
     }
-
 
     /**
      * Synchronously get the <i>CurrentX</i> attribute [attribute ID <b>3</b>].
@@ -504,16 +489,12 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getCurrentX(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_CURRENTX).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_CURRENTX).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_CURRENTX).getLastValue();
-            }
+        if (attributes.get(ATTR_CURRENTX).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_CURRENTX).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_CURRENTX));
     }
-
 
     /**
      * Set reporting for the <i>CurrentX</i> attribute [attribute ID <b>3</b>].
@@ -560,7 +541,6 @@ public class ZclColorControlCluster extends ZclCluster {
         return read(attributes.get(ATTR_CURRENTY));
     }
 
-
     /**
      * Synchronously get the <i>CurrentY</i> attribute [attribute ID <b>4</b>].
      * <p>
@@ -587,16 +567,12 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getCurrentY(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_CURRENTY).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_CURRENTY).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_CURRENTY).getLastValue();
-            }
+        if (attributes.get(ATTR_CURRENTY).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_CURRENTY).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_CURRENTY));
     }
-
 
     /**
      * Set reporting for the <i>CurrentY</i> attribute [attribute ID <b>4</b>].
@@ -638,7 +614,6 @@ public class ZclColorControlCluster extends ZclCluster {
         return read(attributes.get(ATTR_DRIFTCOMPENSATION));
     }
 
-
     /**
      * Synchronously get the <i>DriftCompensation</i> attribute [attribute ID <b>5</b>].
      * <p>
@@ -660,11 +635,8 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getDriftCompensation(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_DRIFTCOMPENSATION).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_DRIFTCOMPENSATION).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_DRIFTCOMPENSATION).getLastValue();
-            }
+        if (attributes.get(ATTR_DRIFTCOMPENSATION).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_DRIFTCOMPENSATION).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_DRIFTCOMPENSATION));
@@ -685,7 +657,6 @@ public class ZclColorControlCluster extends ZclCluster {
     public Future<CommandResult> getCompensationTextAsync() {
         return read(attributes.get(ATTR_COMPENSATIONTEXT));
     }
-
 
     /**
      * Synchronously get the <i>CompensationText</i> attribute [attribute ID <b>6</b>].
@@ -708,11 +679,8 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link String} attribute value, or null on error
      */
     public String getCompensationText(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_COMPENSATIONTEXT).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_COMPENSATIONTEXT).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (String) attributes.get(ATTR_COMPENSATIONTEXT).getLastValue();
-            }
+        if (attributes.get(ATTR_COMPENSATIONTEXT).isLastValueCurrent(refreshPeriod)) {
+            return (String) attributes.get(ATTR_COMPENSATIONTEXT).getLastValue();
         }
 
         return (String) readSync(attributes.get(ATTR_COMPENSATIONTEXT));
@@ -744,7 +712,6 @@ public class ZclColorControlCluster extends ZclCluster {
     public Future<CommandResult> getColorTemperatureAsync() {
         return read(attributes.get(ATTR_COLORTEMPERATURE));
     }
-
 
     /**
      * Synchronously get the <i>ColorTemperature</i> attribute [attribute ID <b>7</b>].
@@ -778,16 +745,12 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getColorTemperature(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_COLORTEMPERATURE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_COLORTEMPERATURE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_COLORTEMPERATURE).getLastValue();
-            }
+        if (attributes.get(ATTR_COLORTEMPERATURE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_COLORTEMPERATURE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_COLORTEMPERATURE));
     }
-
 
     /**
      * Set reporting for the <i>ColorTemperature</i> attribute [attribute ID <b>7</b>].
@@ -837,7 +800,6 @@ public class ZclColorControlCluster extends ZclCluster {
         return read(attributes.get(ATTR_COLORMODE));
     }
 
-
     /**
      * Synchronously get the <i>ColorMode</i> attribute [attribute ID <b>8</b>].
      * <p>
@@ -861,11 +823,8 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getColorMode(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_COLORMODE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_COLORMODE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_COLORMODE).getLastValue();
-            }
+        if (attributes.get(ATTR_COLORMODE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_COLORMODE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_COLORMODE));
@@ -889,7 +848,6 @@ public class ZclColorControlCluster extends ZclCluster {
     public Future<CommandResult> getEnhancedCurrentHueAsync() {
         return read(attributes.get(ATTR_ENHANCEDCURRENTHUE));
     }
-
 
     /**
      * Synchronously get the <i>EnhancedCurrentHue</i> attribute [attribute ID <b>16384</b>].
@@ -915,16 +873,12 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getEnhancedCurrentHue(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ENHANCEDCURRENTHUE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ENHANCEDCURRENTHUE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ENHANCEDCURRENTHUE).getLastValue();
-            }
+        if (attributes.get(ATTR_ENHANCEDCURRENTHUE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ENHANCEDCURRENTHUE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ENHANCEDCURRENTHUE));
     }
-
 
     /**
      * Set reporting for the <i>EnhancedCurrentHue</i> attribute [attribute ID <b>16384</b>].
@@ -965,7 +919,6 @@ public class ZclColorControlCluster extends ZclCluster {
         return read(attributes.get(ATTR_ENHANCEDCOLORMODE));
     }
 
-
     /**
      * Synchronously get the <i>EnhancedColorMode</i> attribute [attribute ID <b>16385</b>].
      * <p>
@@ -988,11 +941,8 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getEnhancedColorMode(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ENHANCEDCOLORMODE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ENHANCEDCOLORMODE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ENHANCEDCOLORMODE).getLastValue();
-            }
+        if (attributes.get(ATTR_ENHANCEDCOLORMODE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ENHANCEDCOLORMODE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ENHANCEDCOLORMODE));
@@ -1014,7 +964,6 @@ public class ZclColorControlCluster extends ZclCluster {
     public Future<CommandResult> getColorLoopActiveAsync() {
         return read(attributes.get(ATTR_COLORLOOPACTIVE));
     }
-
 
     /**
      * Synchronously get the <i>ColorLoopActive</i> attribute [attribute ID <b>16386</b>].
@@ -1038,11 +987,8 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getColorLoopActive(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_COLORLOOPACTIVE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_COLORLOOPACTIVE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_COLORLOOPACTIVE).getLastValue();
-            }
+        if (attributes.get(ATTR_COLORLOOPACTIVE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_COLORLOOPACTIVE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_COLORLOOPACTIVE));
@@ -1065,7 +1011,6 @@ public class ZclColorControlCluster extends ZclCluster {
     public Future<CommandResult> getColorLoopDirectionAsync() {
         return read(attributes.get(ATTR_COLORLOOPDIRECTION));
     }
-
 
     /**
      * Synchronously get the <i>ColorLoopDirection</i> attribute [attribute ID <b>16387</b>].
@@ -1090,11 +1035,8 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getColorLoopDirection(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_COLORLOOPDIRECTION).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_COLORLOOPDIRECTION).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_COLORLOOPDIRECTION).getLastValue();
-            }
+        if (attributes.get(ATTR_COLORLOOPDIRECTION).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_COLORLOOPDIRECTION).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_COLORLOOPDIRECTION));
@@ -1115,7 +1057,6 @@ public class ZclColorControlCluster extends ZclCluster {
     public Future<CommandResult> getColorLoopTimeAsync() {
         return read(attributes.get(ATTR_COLORLOOPTIME));
     }
-
 
     /**
      * Synchronously get the <i>ColorLoopTime</i> attribute [attribute ID <b>16388</b>].
@@ -1138,11 +1079,8 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getColorLoopTime(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_COLORLOOPTIME).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_COLORLOOPTIME).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_COLORLOOPTIME).getLastValue();
-            }
+        if (attributes.get(ATTR_COLORLOOPTIME).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_COLORLOOPTIME).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_COLORLOOPTIME));
@@ -1163,7 +1101,6 @@ public class ZclColorControlCluster extends ZclCluster {
     public Future<CommandResult> getColorLoopStartHueAsync() {
         return read(attributes.get(ATTR_COLORLOOPSTARTHUE));
     }
-
 
     /**
      * Synchronously get the <i>ColorLoopStartHue</i> attribute [attribute ID <b>16389</b>].
@@ -1186,11 +1123,8 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getColorLoopStartHue(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_COLORLOOPSTARTHUE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_COLORLOOPSTARTHUE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_COLORLOOPSTARTHUE).getLastValue();
-            }
+        if (attributes.get(ATTR_COLORLOOPSTARTHUE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_COLORLOOPSTARTHUE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_COLORLOOPSTARTHUE));
@@ -1212,7 +1146,6 @@ public class ZclColorControlCluster extends ZclCluster {
     public Future<CommandResult> getColorLoopStoredHueAsync() {
         return read(attributes.get(ATTR_COLORLOOPSTOREDHUE));
     }
-
 
     /**
      * Synchronously get the <i>ColorLoopStoredHue</i> attribute [attribute ID <b>16390</b>].
@@ -1236,11 +1169,8 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getColorLoopStoredHue(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_COLORLOOPSTOREDHUE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_COLORLOOPSTOREDHUE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_COLORLOOPSTOREDHUE).getLastValue();
-            }
+        if (attributes.get(ATTR_COLORLOOPSTOREDHUE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_COLORLOOPSTOREDHUE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_COLORLOOPSTOREDHUE));
@@ -1263,7 +1193,6 @@ public class ZclColorControlCluster extends ZclCluster {
     public Future<CommandResult> getColorCapabilitiesAsync() {
         return read(attributes.get(ATTR_COLORCAPABILITIES));
     }
-
 
     /**
      * Synchronously get the <i>ColorCapabilities</i> attribute [attribute ID <b>16394</b>].
@@ -1288,11 +1217,8 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getColorCapabilities(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_COLORCAPABILITIES).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_COLORCAPABILITIES).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_COLORCAPABILITIES).getLastValue();
-            }
+        if (attributes.get(ATTR_COLORCAPABILITIES).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_COLORCAPABILITIES).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_COLORCAPABILITIES));
@@ -1315,7 +1241,6 @@ public class ZclColorControlCluster extends ZclCluster {
     public Future<CommandResult> getColorTemperatureMinAsync() {
         return read(attributes.get(ATTR_COLORTEMPERATUREMIN));
     }
-
 
     /**
      * Synchronously get the <i>ColorTemperatureMin</i> attribute [attribute ID <b>16395</b>].
@@ -1340,11 +1265,8 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getColorTemperatureMin(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_COLORTEMPERATUREMIN).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_COLORTEMPERATUREMIN).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_COLORTEMPERATUREMIN).getLastValue();
-            }
+        if (attributes.get(ATTR_COLORTEMPERATUREMIN).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_COLORTEMPERATUREMIN).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_COLORTEMPERATUREMIN));
@@ -1367,7 +1289,6 @@ public class ZclColorControlCluster extends ZclCluster {
     public Future<CommandResult> getColorTemperatureMaxAsync() {
         return read(attributes.get(ATTR_COLORTEMPERATUREMAX));
     }
-
 
     /**
      * Synchronously get the <i>ColorTemperatureMax</i> attribute [attribute ID <b>16396</b>].
@@ -1392,11 +1313,8 @@ public class ZclColorControlCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getColorTemperatureMax(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_COLORTEMPERATUREMAX).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_COLORTEMPERATUREMAX).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_COLORTEMPERATUREMAX).getLastValue();
-            }
+        if (attributes.get(ATTR_COLORTEMPERATUREMAX).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_COLORTEMPERATUREMAX).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_COLORTEMPERATUREMAX));

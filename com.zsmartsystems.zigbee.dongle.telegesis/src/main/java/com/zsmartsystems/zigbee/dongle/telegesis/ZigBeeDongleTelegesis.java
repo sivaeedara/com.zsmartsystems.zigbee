@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,7 @@ import com.zsmartsystems.zigbee.dongle.telegesis.internal.protocol.TelegesisSend
 import com.zsmartsystems.zigbee.dongle.telegesis.internal.protocol.TelegesisSetChannelMaskCommand;
 import com.zsmartsystems.zigbee.dongle.telegesis.internal.protocol.TelegesisSetEpanIdCommand;
 import com.zsmartsystems.zigbee.dongle.telegesis.internal.protocol.TelegesisSetExtendedFunctionCommand;
+import com.zsmartsystems.zigbee.dongle.telegesis.internal.protocol.TelegesisSetFrameCntCommand;
 import com.zsmartsystems.zigbee.dongle.telegesis.internal.protocol.TelegesisSetInputClustersCommand;
 import com.zsmartsystems.zigbee.dongle.telegesis.internal.protocol.TelegesisSetMainFunctionCommand;
 import com.zsmartsystems.zigbee.dongle.telegesis.internal.protocol.TelegesisSetNetworkKeyCommand;
@@ -559,7 +560,6 @@ public class ZigBeeDongleTelegesis
 
     @Override
     public void telegesisEventReceived(TelegesisEvent event) {
-        logger.debug("Telegesis RX: " + event.toString());
         if (event instanceof TelegesisReceiveMessageEvent) {
             TelegesisReceiveMessageEvent rxMessage = (TelegesisReceiveMessageEvent) event;
 
@@ -786,6 +786,15 @@ public class ZigBeeDongleTelegesis
             } catch (ClassCastException e) {
                 configuration.setResult(option, TransportConfigResult.ERROR_INVALID_VALUE);
             }
+        }
+    }
+
+    public void reinitializeDongle(Integer panId, ExtendedPanId epanId, Long frameCounter) {
+        TelegesisSetFrameCntCommand setCount = new TelegesisSetFrameCntCommand();
+        setCount.setFrameCnt(frameCounter);
+        if (frameHandler.sendRequest(setCount) == null) {
+            logger.debug("Error setting Telegesis security frame counter");
+            return;
         }
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,10 +18,10 @@ import com.zsmartsystems.zigbee.zcl.clusters.identify.IdentifyQueryCommand;
 import com.zsmartsystems.zigbee.zcl.clusters.identify.IdentifyQueryResponse;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclClusterType;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclDataType;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import javax.annotation.Generated;
 
 /**
  * <b>Identify</b> cluster implementation (<i>Cluster ID 0x0003</i>).
@@ -35,6 +35,7 @@ import java.util.concurrent.Future;
  * <p>
  * Code is auto-generated. Modifications may be overwritten!
  */
+@Generated(value = "com.zsmartsystems.zigbee.autocode.ZclProtocolCodeGenerator", date = "2018-03-12T23:36:29Z")
 public class ZclIdentifyCluster extends ZclCluster {
     /**
      * The ZigBee Cluster Library Cluster ID
@@ -80,8 +81,6 @@ public class ZclIdentifyCluster extends ZclCluster {
     public ZclIdentifyCluster(final ZigBeeNetworkManager zigbeeManager, final ZigBeeEndpoint zigbeeEndpoint) {
         super(zigbeeManager, zigbeeEndpoint, CLUSTER_ID, CLUSTER_NAME);
     }
-
-
 
     /**
      * Set the <i>IdentifyTime</i> attribute [attribute ID <b>0</b>].
@@ -134,7 +133,6 @@ public class ZclIdentifyCluster extends ZclCluster {
         return read(attributes.get(ATTR_IDENTIFYTIME));
     }
 
-
     /**
      * Synchronously get the <i>IdentifyTime</i> attribute [attribute ID <b>0</b>].
      * <p>
@@ -165,11 +163,8 @@ public class ZclIdentifyCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getIdentifyTime(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_IDENTIFYTIME).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_IDENTIFYTIME).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_IDENTIFYTIME).getLastValue();
-            }
+        if (attributes.get(ATTR_IDENTIFYTIME).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_IDENTIFYTIME).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_IDENTIFYTIME));

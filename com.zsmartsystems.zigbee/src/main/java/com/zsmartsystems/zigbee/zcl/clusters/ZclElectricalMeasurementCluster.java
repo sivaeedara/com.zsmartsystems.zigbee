@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,10 +14,10 @@ import com.zsmartsystems.zigbee.zcl.ZclAttribute;
 import com.zsmartsystems.zigbee.zcl.ZclCluster;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclClusterType;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclDataType;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import javax.annotation.Generated;
 
 /**
  * <b>Electrical Measurement</b> cluster implementation (<i>Cluster ID 0x0B04</i>).
@@ -35,6 +35,7 @@ import java.util.concurrent.Future;
  * <p>
  * Code is auto-generated. Modifications may be overwritten!
  */
+@Generated(value = "com.zsmartsystems.zigbee.autocode.ZclProtocolCodeGenerator", date = "2018-03-12T23:36:29Z")
 public class ZclElectricalMeasurementCluster extends ZclCluster {
     /**
      * The ZigBee Cluster Library Cluster ID
@@ -147,7 +148,6 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
         super(zigbeeManager, zigbeeEndpoint, CLUSTER_ID, CLUSTER_NAME);
     }
 
-
     /**
      * Get the <i>MeasurementType</i> attribute [attribute ID <b>0</b>].
      * <p>
@@ -163,7 +163,6 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getMeasurementTypeAsync() {
         return read(attributes.get(ATTR_MEASUREMENTTYPE));
     }
-
 
     /**
      * Synchronously get the <i>MeasurementType</i> attribute [attribute ID <b>0</b>].
@@ -186,11 +185,8 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getMeasurementType(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_MEASUREMENTTYPE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_MEASUREMENTTYPE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_MEASUREMENTTYPE).getLastValue();
-            }
+        if (attributes.get(ATTR_MEASUREMENTTYPE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_MEASUREMENTTYPE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_MEASUREMENTTYPE));
@@ -211,7 +207,6 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getAcFrequencyAsync() {
         return read(attributes.get(ATTR_ACFREQUENCY));
     }
-
 
     /**
      * Synchronously get the <i>ACFrequency</i> attribute [attribute ID <b>768</b>].
@@ -234,11 +229,8 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getAcFrequency(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ACFREQUENCY).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ACFREQUENCY).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ACFREQUENCY).getLastValue();
-            }
+        if (attributes.get(ATTR_ACFREQUENCY).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ACFREQUENCY).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ACFREQUENCY));
@@ -261,7 +253,6 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getTotalActivePowerAsync() {
         return read(attributes.get(ATTR_TOTALACTIVEPOWER));
     }
-
 
     /**
      * Synchronously get the <i>TotalActivePower</i> attribute [attribute ID <b>772</b>].
@@ -286,11 +277,8 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getTotalActivePower(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_TOTALACTIVEPOWER).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_TOTALACTIVEPOWER).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_TOTALACTIVEPOWER).getLastValue();
-            }
+        if (attributes.get(ATTR_TOTALACTIVEPOWER).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_TOTALACTIVEPOWER).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_TOTALACTIVEPOWER));
@@ -314,7 +302,6 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getTotalReactivePowerAsync() {
         return read(attributes.get(ATTR_TOTALREACTIVEPOWER));
     }
-
 
     /**
      * Synchronously get the <i>TotalReactivePower</i> attribute [attribute ID <b>773</b>].
@@ -340,11 +327,8 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getTotalReactivePower(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_TOTALREACTIVEPOWER).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_TOTALREACTIVEPOWER).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_TOTALREACTIVEPOWER).getLastValue();
-            }
+        if (attributes.get(ATTR_TOTALREACTIVEPOWER).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_TOTALREACTIVEPOWER).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_TOTALREACTIVEPOWER));
@@ -365,7 +349,6 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getTotalApparentPowerAsync() {
         return read(attributes.get(ATTR_TOTALAPPARENTPOWER));
     }
-
 
     /**
      * Synchronously get the <i>TotalApparentPower</i> attribute [attribute ID <b>774</b>].
@@ -388,11 +371,8 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getTotalApparentPower(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_TOTALAPPARENTPOWER).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_TOTALAPPARENTPOWER).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_TOTALAPPARENTPOWER).getLastValue();
-            }
+        if (attributes.get(ATTR_TOTALAPPARENTPOWER).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_TOTALAPPARENTPOWER).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_TOTALAPPARENTPOWER));
@@ -413,7 +393,6 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getRmsVoltageAsync() {
         return read(attributes.get(ATTR_RMSVOLTAGE));
     }
-
 
     /**
      * Synchronously get the <i>RMSVoltage</i> attribute [attribute ID <b>1285</b>].
@@ -436,11 +415,8 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getRmsVoltage(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_RMSVOLTAGE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_RMSVOLTAGE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_RMSVOLTAGE).getLastValue();
-            }
+        if (attributes.get(ATTR_RMSVOLTAGE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_RMSVOLTAGE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_RMSVOLTAGE));
@@ -461,7 +437,6 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getRmsCurrentAsync() {
         return read(attributes.get(ATTR_RMSCURRENT));
     }
-
 
     /**
      * Synchronously get the <i>RMSCurrent</i> attribute [attribute ID <b>1288</b>].
@@ -484,11 +459,8 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getRmsCurrent(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_RMSCURRENT).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_RMSCURRENT).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_RMSCURRENT).getLastValue();
-            }
+        if (attributes.get(ATTR_RMSCURRENT).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_RMSCURRENT).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_RMSCURRENT));
@@ -510,7 +482,6 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getActivePowerAsync() {
         return read(attributes.get(ATTR_ACTIVEPOWER));
     }
-
 
     /**
      * Synchronously get the <i>ActivePower</i> attribute [attribute ID <b>1291</b>].
@@ -534,11 +505,8 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getActivePower(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ACTIVEPOWER).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ACTIVEPOWER).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ACTIVEPOWER).getLastValue();
-            }
+        if (attributes.get(ATTR_ACTIVEPOWER).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ACTIVEPOWER).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ACTIVEPOWER));
@@ -559,7 +527,6 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getAcCurrentMultiplierAsync() {
         return read(attributes.get(ATTR_ACCURRENTMULTIPLIER));
     }
-
 
     /**
      * Synchronously get the <i>ACCurrentMultiplier</i> attribute [attribute ID <b>1538</b>].
@@ -582,11 +549,8 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getAcCurrentMultiplier(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ACCURRENTMULTIPLIER).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ACCURRENTMULTIPLIER).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ACCURRENTMULTIPLIER).getLastValue();
-            }
+        if (attributes.get(ATTR_ACCURRENTMULTIPLIER).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ACCURRENTMULTIPLIER).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ACCURRENTMULTIPLIER));
@@ -608,7 +572,6 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getAcCurrentDivisorAsync() {
         return read(attributes.get(ATTR_ACCURRENTDIVISOR));
     }
-
 
     /**
      * Synchronously get the <i>ACCurrentDivisor</i> attribute [attribute ID <b>1539</b>].
@@ -632,11 +595,8 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getAcCurrentDivisor(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ACCURRENTDIVISOR).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ACCURRENTDIVISOR).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ACCURRENTDIVISOR).getLastValue();
-            }
+        if (attributes.get(ATTR_ACCURRENTDIVISOR).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ACCURRENTDIVISOR).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ACCURRENTDIVISOR));
@@ -658,7 +618,6 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getAcPowerMultiplierAsync() {
         return read(attributes.get(ATTR_ACPOWERMULTIPLIER));
     }
-
 
     /**
      * Synchronously get the <i>ACPowerMultiplier</i> attribute [attribute ID <b>1540</b>].
@@ -682,11 +641,8 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getAcPowerMultiplier(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ACPOWERMULTIPLIER).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ACPOWERMULTIPLIER).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ACPOWERMULTIPLIER).getLastValue();
-            }
+        if (attributes.get(ATTR_ACPOWERMULTIPLIER).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ACPOWERMULTIPLIER).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ACPOWERMULTIPLIER));
@@ -708,7 +664,6 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
     public Future<CommandResult> getAcPowerDivisorAsync() {
         return read(attributes.get(ATTR_ACPOWERDIVISOR));
     }
-
 
     /**
      * Synchronously get the <i>ACPowerDivisor</i> attribute [attribute ID <b>1541</b>].
@@ -732,11 +687,8 @@ public class ZclElectricalMeasurementCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getAcPowerDivisor(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ACPOWERDIVISOR).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ACPOWERDIVISOR).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ACPOWERDIVISOR).getLastValue();
-            }
+        if (attributes.get(ATTR_ACPOWERDIVISOR).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ACPOWERDIVISOR).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ACPOWERDIVISOR));

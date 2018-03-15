@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import com.zsmartsystems.zigbee.IeeeAddress;
 import com.zsmartsystems.zigbee.ZigBeeEndpoint;
 import com.zsmartsystems.zigbee.ZigBeeEndpointAddress;
 import com.zsmartsystems.zigbee.ZigBeeNetworkManager;
+import com.zsmartsystems.zigbee.dao.ZclClusterDao;
 import com.zsmartsystems.zigbee.internal.NotificationService;
 import com.zsmartsystems.zigbee.zcl.clusters.general.ConfigureReportingCommand;
 import com.zsmartsystems.zigbee.zcl.clusters.general.DefaultResponse;
@@ -48,6 +49,7 @@ import com.zsmartsystems.zigbee.zcl.field.AttributeReportingConfigurationRecord;
 import com.zsmartsystems.zigbee.zcl.field.ReadAttributeStatusRecord;
 import com.zsmartsystems.zigbee.zcl.field.WriteAttributeRecord;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclCommandDirection;
+import com.zsmartsystems.zigbee.zcl.protocol.ZclDataType;
 import com.zsmartsystems.zigbee.zdo.command.BindRequest;
 import com.zsmartsystems.zigbee.zdo.command.UnbindRequest;
 
@@ -76,7 +78,7 @@ public abstract class ZclCluster {
     /**
      * The ZCL cluster ID for this cluster
      */
-    protected final int clusterId;
+    protected int clusterId;
 
     /**
      * The name of this cluster
@@ -160,14 +162,46 @@ public abstract class ZclCluster {
     /**
      * Read an attribute
      *
+     * @param attribute the attribute to read
+     * @return command future
+     */
+    public Future<CommandResult> read(final int attribute) {
+        final ReadAttributesCommand command = new ReadAttributesCommand();
+
+        command.setClusterId(clusterId);
+        command.setIdentifiers(Collections.singletonList(attribute));
+        command.setDestinationAddress(zigbeeEndpoint.getEndpointAddress());
+
+        return send(command);
+    }
+
+    /**
+     * Read an attribute
+     *
      * @param attribute the {@link ZclAttribute} to read
      * @return command future
      */
     public Future<CommandResult> read(final ZclAttribute attribute) {
-        final ReadAttributesCommand command = new ReadAttributesCommand();
+        return read(attribute.getId());
+    }
+
+    /**
+     * Write an attribute
+     *
+     * @param attribute the attribute to write
+     * @param dataType the {@link ZclDataType} of the object
+     * @param value the value to set (as {@link Object})
+     * @return command future {@link CommandResult}
+     */
+    public Future<CommandResult> write(final int attribute, final ZclDataType dataType, final Object value) {
+        final WriteAttributesCommand command = new WriteAttributesCommand();
 
         command.setClusterId(clusterId);
-        command.setIdentifiers(Collections.singletonList(attribute.getId()));
+        final WriteAttributeRecord attributeIdentifier = new WriteAttributeRecord();
+        attributeIdentifier.setAttributeIdentifier(attribute);
+        attributeIdentifier.setAttributeDataType(dataType);
+        attributeIdentifier.setAttributeValue(value);
+        command.setRecords(Collections.singletonList(attributeIdentifier));
         command.setDestinationAddress(zigbeeEndpoint.getEndpointAddress());
 
         return send(command);
@@ -181,17 +215,7 @@ public abstract class ZclCluster {
      * @return command future {@link CommandResult}
      */
     public Future<CommandResult> write(final ZclAttribute attribute, final Object value) {
-        final WriteAttributesCommand command = new WriteAttributesCommand();
-
-        command.setClusterId(clusterId);
-        final WriteAttributeRecord attributeIdentifier = new WriteAttributeRecord();
-        attributeIdentifier.setAttributeIdentifier(attribute.getId());
-        attributeIdentifier.setAttributeDataType(attribute.getDataType());
-        attributeIdentifier.setAttributeValue(value);
-        command.setRecords(Collections.singletonList(attributeIdentifier));
-        command.setDestinationAddress(zigbeeEndpoint.getEndpointAddress());
-
-        return send(command);
+        return write(attribute.getId(), attribute.getDataType(), value);
     }
 
     /**
@@ -890,5 +914,27 @@ public abstract class ZclCluster {
      */
     public ZclCommand getResponseFromId(int commandId) {
         return null;
+    }
+
+    public ZclClusterDao getDao() {
+        ZclClusterDao dao = new ZclClusterDao();
+
+        dao.setClusterId(clusterId);
+        dao.setClient(isClient);
+        dao.setSupportedAttributes(supportedAttributes);
+        dao.setSupportedCommandsGenerated(supportedCommandsGenerated);
+        dao.setSupportedCommandsReceived(supportedCommandsReceived);
+        dao.setAttributes(attributes);
+
+        return dao;
+    }
+
+    public void setDao(ZclClusterDao dao) {
+        clusterId = dao.getClusterId();
+        isClient = dao.getClient();
+        supportedAttributes.addAll(dao.getSupportedAttributes());
+        supportedCommandsGenerated.addAll(dao.getSupportedCommandsGenerated());
+        supportedCommandsReceived.addAll(dao.getSupportedCommandsReceived());
+        attributes = dao.getAttributes();
     }
 }

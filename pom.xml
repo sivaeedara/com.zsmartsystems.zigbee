@@ -4,7 +4,7 @@
 
 	<groupId>com.zsmartsystems</groupId>
 	<artifactId>zigbee</artifactId>
-	<version>1.0.4-SNAPSHOT</version>
+	<version>1.0.7-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -29,7 +29,7 @@
 
 	<modules>
 		<module>com.zsmartsystems.zigbee</module>
-		<!--<module>com.zsmartsystems.zigbee.autocode</module>-->
+        <module>com.zsmartsystems.zigbee.dongle.xbee</module>
 		<module>com.zsmartsystems.zigbee.dongle.cc2531</module>
 		<module>com.zsmartsystems.zigbee.dongle.ember</module>
 		<module>com.zsmartsystems.zigbee.dongle.conbee</module>
@@ -110,7 +110,7 @@
 						<include>src/**/*.java</include>
 					</includes>
 					<properties>
-						<year>2017</year>
+						<year>2018</year>
 					</properties>
 					<encoding>UTF-8</encoding>
 				</configuration>
@@ -122,6 +122,36 @@
 					</execution>
 				</executions>
 			</plugin>
+
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+				<groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>bundle-manifest</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Name>${artifactId}</Bundle-Name>
+                        <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
+                        <Bundle-Description>${pom.name}</Bundle-Description>
+                    </instructions>
+                </configuration>
+            </plugin>
 
 		</plugins>
 
@@ -138,13 +168,13 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.5</version>
+			<version>1.7.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.5</version>
+			<version>1.7.2</version>
 		</dependency>
 
 		<dependency>

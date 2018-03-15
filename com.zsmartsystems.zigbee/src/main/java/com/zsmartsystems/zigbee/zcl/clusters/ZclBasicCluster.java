@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,16 +16,17 @@ import com.zsmartsystems.zigbee.zcl.ZclCommand;
 import com.zsmartsystems.zigbee.zcl.clusters.basic.ResetToFactoryDefaultsCommand;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclClusterType;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclDataType;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import javax.annotation.Generated;
 
 /**
  * <b>Basic</b> cluster implementation (<i>Cluster ID 0x0000</i>).
  * <p>
  * Code is auto-generated. Modifications may be overwritten!
  */
+@Generated(value = "com.zsmartsystems.zigbee.autocode.ZclProtocolCodeGenerator", date = "2018-03-12T23:36:29Z")
 public class ZclBasicCluster extends ZclCluster {
     /**
      * The ZigBee Cluster Library Cluster ID
@@ -112,10 +113,14 @@ public class ZclBasicCluster extends ZclCluster {
      * unauthorised persons in a public building.
      */
     public static final int ATTR_DISABLELOCALCONFIG = 0x0014;
+    /**
+     * The SWBuildIDattribute represents a detailed, manufacturer-specific reference to the version of the software.
+     */
+    public static final int ATTR_SWBUILDID = 0x4000;
 
     // Attribute initialisation
     protected Map<Integer, ZclAttribute> initializeAttributes() {
-        Map<Integer, ZclAttribute> attributeMap = new ConcurrentHashMap<Integer, ZclAttribute>(13);
+        Map<Integer, ZclAttribute> attributeMap = new ConcurrentHashMap<Integer, ZclAttribute>(14);
 
         attributeMap.put(ATTR_ZCLVERSION, new ZclAttribute(ZclClusterType.BASIC, ATTR_ZCLVERSION, "ZCLVersion", ZclDataType.UNSIGNED_8_BIT_INTEGER, true, true, false, false));
         attributeMap.put(ATTR_APPLICATIONVERSION, new ZclAttribute(ZclClusterType.BASIC, ATTR_APPLICATIONVERSION, "ApplicationVersion", ZclDataType.UNSIGNED_8_BIT_INTEGER, true, true, false, false));
@@ -130,6 +135,7 @@ public class ZclBasicCluster extends ZclCluster {
         attributeMap.put(ATTR_DEVICEENABLED, new ZclAttribute(ZclClusterType.BASIC, ATTR_DEVICEENABLED, "DeviceEnabled", ZclDataType.BOOLEAN, true, true, true, false));
         attributeMap.put(ATTR_ALARMMASK, new ZclAttribute(ZclClusterType.BASIC, ATTR_ALARMMASK, "AlarmMask", ZclDataType.BITMAP_8_BIT, true, true, true, false));
         attributeMap.put(ATTR_DISABLELOCALCONFIG, new ZclAttribute(ZclClusterType.BASIC, ATTR_DISABLELOCALCONFIG, "DisableLocalConfig", ZclDataType.BITMAP_8_BIT, true, true, true, false));
+        attributeMap.put(ATTR_SWBUILDID, new ZclAttribute(ZclClusterType.BASIC, ATTR_SWBUILDID, "SWBuildID", ZclDataType.CHARACTER_STRING, false, true, false, false));
 
         return attributeMap;
     }
@@ -143,7 +149,6 @@ public class ZclBasicCluster extends ZclCluster {
     public ZclBasicCluster(final ZigBeeNetworkManager zigbeeManager, final ZigBeeEndpoint zigbeeEndpoint) {
         super(zigbeeManager, zigbeeEndpoint, CLUSTER_ID, CLUSTER_NAME);
     }
-
 
     /**
      * Get the <i>ZCLVersion</i> attribute [attribute ID <b>0</b>].
@@ -160,7 +165,6 @@ public class ZclBasicCluster extends ZclCluster {
     public Future<CommandResult> getZclVersionAsync() {
         return read(attributes.get(ATTR_ZCLVERSION));
     }
-
 
     /**
      * Synchronously get the <i>ZCLVersion</i> attribute [attribute ID <b>0</b>].
@@ -183,11 +187,8 @@ public class ZclBasicCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getZclVersion(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ZCLVERSION).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ZCLVERSION).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ZCLVERSION).getLastValue();
-            }
+        if (attributes.get(ATTR_ZCLVERSION).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ZCLVERSION).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ZCLVERSION));
@@ -209,7 +210,6 @@ public class ZclBasicCluster extends ZclCluster {
     public Future<CommandResult> getApplicationVersionAsync() {
         return read(attributes.get(ATTR_APPLICATIONVERSION));
     }
-
 
     /**
      * Synchronously get the <i>ApplicationVersion</i> attribute [attribute ID <b>1</b>].
@@ -233,11 +233,8 @@ public class ZclBasicCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getApplicationVersion(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_APPLICATIONVERSION).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_APPLICATIONVERSION).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_APPLICATIONVERSION).getLastValue();
-            }
+        if (attributes.get(ATTR_APPLICATIONVERSION).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_APPLICATIONVERSION).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_APPLICATIONVERSION));
@@ -259,7 +256,6 @@ public class ZclBasicCluster extends ZclCluster {
     public Future<CommandResult> getStackVersionAsync() {
         return read(attributes.get(ATTR_STACKVERSION));
     }
-
 
     /**
      * Synchronously get the <i>StackVersion</i> attribute [attribute ID <b>2</b>].
@@ -283,11 +279,8 @@ public class ZclBasicCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getStackVersion(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_STACKVERSION).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_STACKVERSION).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_STACKVERSION).getLastValue();
-            }
+        if (attributes.get(ATTR_STACKVERSION).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_STACKVERSION).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_STACKVERSION));
@@ -308,7 +301,6 @@ public class ZclBasicCluster extends ZclCluster {
     public Future<CommandResult> getHwVersionAsync() {
         return read(attributes.get(ATTR_HWVERSION));
     }
-
 
     /**
      * Synchronously get the <i>HWVersion</i> attribute [attribute ID <b>3</b>].
@@ -331,11 +323,8 @@ public class ZclBasicCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getHwVersion(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_HWVERSION).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_HWVERSION).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_HWVERSION).getLastValue();
-            }
+        if (attributes.get(ATTR_HWVERSION).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_HWVERSION).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_HWVERSION));
@@ -356,7 +345,6 @@ public class ZclBasicCluster extends ZclCluster {
     public Future<CommandResult> getManufacturerNameAsync() {
         return read(attributes.get(ATTR_MANUFACTURERNAME));
     }
-
 
     /**
      * Synchronously get the <i>ManufacturerName</i> attribute [attribute ID <b>4</b>].
@@ -379,11 +367,8 @@ public class ZclBasicCluster extends ZclCluster {
      * @return the {@link String} attribute value, or null on error
      */
     public String getManufacturerName(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_MANUFACTURERNAME).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_MANUFACTURERNAME).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (String) attributes.get(ATTR_MANUFACTURERNAME).getLastValue();
-            }
+        if (attributes.get(ATTR_MANUFACTURERNAME).isLastValueCurrent(refreshPeriod)) {
+            return (String) attributes.get(ATTR_MANUFACTURERNAME).getLastValue();
         }
 
         return (String) readSync(attributes.get(ATTR_MANUFACTURERNAME));
@@ -404,7 +389,6 @@ public class ZclBasicCluster extends ZclCluster {
     public Future<CommandResult> getModelIdentifierAsync() {
         return read(attributes.get(ATTR_MODELIDENTIFIER));
     }
-
 
     /**
      * Synchronously get the <i>ModelIdentifier</i> attribute [attribute ID <b>5</b>].
@@ -427,11 +411,8 @@ public class ZclBasicCluster extends ZclCluster {
      * @return the {@link String} attribute value, or null on error
      */
     public String getModelIdentifier(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_MODELIDENTIFIER).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_MODELIDENTIFIER).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (String) attributes.get(ATTR_MODELIDENTIFIER).getLastValue();
-            }
+        if (attributes.get(ATTR_MODELIDENTIFIER).isLastValueCurrent(refreshPeriod)) {
+            return (String) attributes.get(ATTR_MODELIDENTIFIER).getLastValue();
         }
 
         return (String) readSync(attributes.get(ATTR_MODELIDENTIFIER));
@@ -453,7 +434,6 @@ public class ZclBasicCluster extends ZclCluster {
     public Future<CommandResult> getDateCodeAsync() {
         return read(attributes.get(ATTR_DATECODE));
     }
-
 
     /**
      * Synchronously get the <i>DateCode</i> attribute [attribute ID <b>6</b>].
@@ -477,11 +457,8 @@ public class ZclBasicCluster extends ZclCluster {
      * @return the {@link String} attribute value, or null on error
      */
     public String getDateCode(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_DATECODE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_DATECODE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (String) attributes.get(ATTR_DATECODE).getLastValue();
-            }
+        if (attributes.get(ATTR_DATECODE).isLastValueCurrent(refreshPeriod)) {
+            return (String) attributes.get(ATTR_DATECODE).getLastValue();
         }
 
         return (String) readSync(attributes.get(ATTR_DATECODE));
@@ -504,7 +481,6 @@ public class ZclBasicCluster extends ZclCluster {
     public Future<CommandResult> getPowerSourceAsync() {
         return read(attributes.get(ATTR_POWERSOURCE));
     }
-
 
     /**
      * Synchronously get the <i>PowerSource</i> attribute [attribute ID <b>7</b>].
@@ -529,16 +505,12 @@ public class ZclBasicCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getPowerSource(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_POWERSOURCE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_POWERSOURCE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_POWERSOURCE).getLastValue();
-            }
+        if (attributes.get(ATTR_POWERSOURCE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_POWERSOURCE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_POWERSOURCE));
     }
-
 
     /**
      * Set the <i>LocationDescription</i> attribute [attribute ID <b>16</b>].
@@ -573,7 +545,6 @@ public class ZclBasicCluster extends ZclCluster {
         return read(attributes.get(ATTR_LOCATIONDESCRIPTION));
     }
 
-
     /**
      * Synchronously get the <i>LocationDescription</i> attribute [attribute ID <b>16</b>].
      * <p>
@@ -595,16 +566,12 @@ public class ZclBasicCluster extends ZclCluster {
      * @return the {@link String} attribute value, or null on error
      */
     public String getLocationDescription(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_LOCATIONDESCRIPTION).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_LOCATIONDESCRIPTION).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (String) attributes.get(ATTR_LOCATIONDESCRIPTION).getLastValue();
-            }
+        if (attributes.get(ATTR_LOCATIONDESCRIPTION).isLastValueCurrent(refreshPeriod)) {
+            return (String) attributes.get(ATTR_LOCATIONDESCRIPTION).getLastValue();
         }
 
         return (String) readSync(attributes.get(ATTR_LOCATIONDESCRIPTION));
     }
-
 
     /**
      * Set the <i>PhysicalEnvironment</i> attribute [attribute ID <b>17</b>].
@@ -639,7 +606,6 @@ public class ZclBasicCluster extends ZclCluster {
         return read(attributes.get(ATTR_PHYSICALENVIRONMENT));
     }
 
-
     /**
      * Synchronously get the <i>PhysicalEnvironment</i> attribute [attribute ID <b>17</b>].
      * <p>
@@ -661,16 +627,12 @@ public class ZclBasicCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getPhysicalEnvironment(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_PHYSICALENVIRONMENT).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_PHYSICALENVIRONMENT).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_PHYSICALENVIRONMENT).getLastValue();
-            }
+        if (attributes.get(ATTR_PHYSICALENVIRONMENT).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_PHYSICALENVIRONMENT).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_PHYSICALENVIRONMENT));
     }
-
 
     /**
      * Set the <i>DeviceEnabled</i> attribute [attribute ID <b>18</b>].
@@ -705,7 +667,6 @@ public class ZclBasicCluster extends ZclCluster {
         return read(attributes.get(ATTR_DEVICEENABLED));
     }
 
-
     /**
      * Synchronously get the <i>DeviceEnabled</i> attribute [attribute ID <b>18</b>].
      * <p>
@@ -727,16 +688,12 @@ public class ZclBasicCluster extends ZclCluster {
      * @return the {@link Boolean} attribute value, or null on error
      */
     public Boolean getDeviceEnabled(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_DEVICEENABLED).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_DEVICEENABLED).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Boolean) attributes.get(ATTR_DEVICEENABLED).getLastValue();
-            }
+        if (attributes.get(ATTR_DEVICEENABLED).isLastValueCurrent(refreshPeriod)) {
+            return (Boolean) attributes.get(ATTR_DEVICEENABLED).getLastValue();
         }
 
         return (Boolean) readSync(attributes.get(ATTR_DEVICEENABLED));
     }
-
 
     /**
      * Set the <i>AlarmMask</i> attribute [attribute ID <b>19</b>].
@@ -771,7 +728,6 @@ public class ZclBasicCluster extends ZclCluster {
         return read(attributes.get(ATTR_ALARMMASK));
     }
 
-
     /**
      * Synchronously get the <i>AlarmMask</i> attribute [attribute ID <b>19</b>].
      * <p>
@@ -793,16 +749,12 @@ public class ZclBasicCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getAlarmMask(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ALARMMASK).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ALARMMASK).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ALARMMASK).getLastValue();
-            }
+        if (attributes.get(ATTR_ALARMMASK).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ALARMMASK).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ALARMMASK));
     }
-
 
     /**
      * Set the <i>DisableLocalConfig</i> attribute [attribute ID <b>20</b>].
@@ -845,7 +797,6 @@ public class ZclBasicCluster extends ZclCluster {
         return read(attributes.get(ATTR_DISABLELOCALCONFIG));
     }
 
-
     /**
      * Synchronously get the <i>DisableLocalConfig</i> attribute [attribute ID <b>20</b>].
      * <p>
@@ -871,14 +822,53 @@ public class ZclBasicCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getDisableLocalConfig(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_DISABLELOCALCONFIG).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_DISABLELOCALCONFIG).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_DISABLELOCALCONFIG).getLastValue();
-            }
+        if (attributes.get(ATTR_DISABLELOCALCONFIG).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_DISABLELOCALCONFIG).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_DISABLELOCALCONFIG));
+    }
+
+    /**
+     * Get the <i>SWBuildID</i> attribute [attribute ID <b>16384</b>].
+     * <p>
+     * The SWBuildIDattribute represents a detailed, manufacturer-specific reference to the version of the software.
+     * <p>
+     * The attribute is of type {@link String}.
+     * <p>
+     * The implementation of this attribute by a device is OPTIONAL
+     *
+     * @return the {@link Future<CommandResult>} command result future
+     */
+    public Future<CommandResult> getSwBuildIdAsync() {
+        return read(attributes.get(ATTR_SWBUILDID));
+    }
+
+    /**
+     * Synchronously get the <i>SWBuildID</i> attribute [attribute ID <b>16384</b>].
+     * <p>
+     * The SWBuildIDattribute represents a detailed, manufacturer-specific reference to the version of the software.
+     * <p>
+     * This method can return cached data if the attribute has already been received.
+     * The parameter <i>refreshPeriod</i> is used to control this. If the attribute has been received
+     * within <i>refreshPeriod</i> milliseconds, then the method will immediately return the last value
+     * received. If <i>refreshPeriod</i> is set to 0, then the attribute will always be updated.
+     * <p>
+     * This method will block until the response is received or a timeout occurs unless the current value is returned.
+     * <p>
+     * The attribute is of type {@link String}.
+     * <p>
+     * The implementation of this attribute by a device is OPTIONAL
+     *
+     * @param refreshPeriod the maximum age of the data (in milliseconds) before an update is needed
+     * @return the {@link String} attribute value, or null on error
+     */
+    public String getSwBuildId(final long refreshPeriod) {
+        if (attributes.get(ATTR_SWBUILDID).isLastValueCurrent(refreshPeriod)) {
+            return (String) attributes.get(ATTR_SWBUILDID).getLastValue();
+        }
+
+        return (String) readSync(attributes.get(ATTR_SWBUILDID));
     }
 
     /**

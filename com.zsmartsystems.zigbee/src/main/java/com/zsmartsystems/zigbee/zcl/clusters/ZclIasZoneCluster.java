@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016-2017 by the respective copyright holders.
+ * Copyright (c) 2016-2018 by the respective copyright holders.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,10 +19,10 @@ import com.zsmartsystems.zigbee.zcl.clusters.iaszone.ZoneEnrollResponse;
 import com.zsmartsystems.zigbee.zcl.clusters.iaszone.ZoneStatusChangeNotificationCommand;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclClusterType;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclDataType;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import javax.annotation.Generated;
 
 /**
  * <b>IAS Zone</b> cluster implementation (<i>Cluster ID 0x0500</i>).
@@ -33,6 +33,7 @@ import java.util.concurrent.Future;
  * <p>
  * Code is auto-generated. Modifications may be overwritten!
  */
+@Generated(value = "com.zsmartsystems.zigbee.autocode.ZclProtocolCodeGenerator", date = "2018-03-12T23:36:29Z")
 public class ZclIasZoneCluster extends ZclCluster {
     /**
      * The ZigBee Cluster Library Cluster ID
@@ -104,7 +105,6 @@ public class ZclIasZoneCluster extends ZclCluster {
         super(zigbeeManager, zigbeeEndpoint, CLUSTER_ID, CLUSTER_NAME);
     }
 
-
     /**
      * Get the <i>ZoneState</i> attribute [attribute ID <b>0</b>].
      * <p>
@@ -119,7 +119,6 @@ public class ZclIasZoneCluster extends ZclCluster {
     public Future<CommandResult> getZoneStateAsync() {
         return read(attributes.get(ATTR_ZONESTATE));
     }
-
 
     /**
      * Synchronously get the <i>ZoneState</i> attribute [attribute ID <b>0</b>].
@@ -141,11 +140,8 @@ public class ZclIasZoneCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getZoneState(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ZONESTATE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ZONESTATE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ZONESTATE).getLastValue();
-            }
+        if (attributes.get(ATTR_ZONESTATE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ZONESTATE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ZONESTATE));
@@ -165,7 +161,6 @@ public class ZclIasZoneCluster extends ZclCluster {
     public Future<CommandResult> getZoneTypeAsync() {
         return read(attributes.get(ATTR_ZONETYPE));
     }
-
 
     /**
      * Synchronously get the <i>ZoneType</i> attribute [attribute ID <b>1</b>].
@@ -187,11 +182,8 @@ public class ZclIasZoneCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getZoneType(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ZONETYPE).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ZONETYPE).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ZONETYPE).getLastValue();
-            }
+        if (attributes.get(ATTR_ZONETYPE).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ZONETYPE).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ZONETYPE));
@@ -211,7 +203,6 @@ public class ZclIasZoneCluster extends ZclCluster {
     public Future<CommandResult> getZoneStatusAsync() {
         return read(attributes.get(ATTR_ZONESTATUS));
     }
-
 
     /**
      * Synchronously get the <i>ZoneStatus</i> attribute [attribute ID <b>2</b>].
@@ -233,16 +224,12 @@ public class ZclIasZoneCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getZoneStatus(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ZONESTATUS).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ZONESTATUS).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ZONESTATUS).getLastValue();
-            }
+        if (attributes.get(ATTR_ZONESTATUS).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ZONESTATUS).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ZONESTATUS));
     }
-
 
     /**
      * Set the <i>IASCIEAddress</i> attribute [attribute ID <b>16</b>].
@@ -291,7 +278,6 @@ public class ZclIasZoneCluster extends ZclCluster {
         return read(attributes.get(ATTR_IASCIEADDRESS));
     }
 
-
     /**
      * Synchronously get the <i>IASCIEAddress</i> attribute [attribute ID <b>16</b>].
      * <p>
@@ -320,11 +306,8 @@ public class ZclIasZoneCluster extends ZclCluster {
      * @return the {@link IeeeAddress} attribute value, or null on error
      */
     public IeeeAddress getIascieAddress(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_IASCIEADDRESS).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_IASCIEADDRESS).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (IeeeAddress) attributes.get(ATTR_IASCIEADDRESS).getLastValue();
-            }
+        if (attributes.get(ATTR_IASCIEADDRESS).isLastValueCurrent(refreshPeriod)) {
+            return (IeeeAddress) attributes.get(ATTR_IASCIEADDRESS).getLastValue();
         }
 
         return (IeeeAddress) readSync(attributes.get(ATTR_IASCIEADDRESS));
@@ -342,7 +325,6 @@ public class ZclIasZoneCluster extends ZclCluster {
     public Future<CommandResult> getZoneIdAsync() {
         return read(attributes.get(ATTR_ZONEID));
     }
-
 
     /**
      * Synchronously get the <i>ZoneID</i> attribute [attribute ID <b>17</b>].
@@ -362,11 +344,8 @@ public class ZclIasZoneCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getZoneId(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_ZONEID).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_ZONEID).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_ZONEID).getLastValue();
-            }
+        if (attributes.get(ATTR_ZONEID).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_ZONEID).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_ZONEID));
@@ -384,7 +363,6 @@ public class ZclIasZoneCluster extends ZclCluster {
     public Future<CommandResult> getNumberOfZoneSensitivityLevelsSupportedAsync() {
         return read(attributes.get(ATTR_NUMBEROFZONESENSITIVITYLEVELSSUPPORTED));
     }
-
 
     /**
      * Synchronously get the <i>NumberOfZoneSensitivityLevelsSupported</i> attribute [attribute ID <b>18</b>].
@@ -404,16 +382,12 @@ public class ZclIasZoneCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getNumberOfZoneSensitivityLevelsSupported(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_NUMBEROFZONESENSITIVITYLEVELSSUPPORTED).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_NUMBEROFZONESENSITIVITYLEVELSSUPPORTED).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_NUMBEROFZONESENSITIVITYLEVELSSUPPORTED).getLastValue();
-            }
+        if (attributes.get(ATTR_NUMBEROFZONESENSITIVITYLEVELSSUPPORTED).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_NUMBEROFZONESENSITIVITYLEVELSSUPPORTED).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_NUMBEROFZONESENSITIVITYLEVELSSUPPORTED));
     }
-
 
     /**
      * Set the <i>CurrentZoneSensitivityLevel</i> attribute [attribute ID <b>19</b>].
@@ -442,7 +416,6 @@ public class ZclIasZoneCluster extends ZclCluster {
         return read(attributes.get(ATTR_CURRENTZONESENSITIVITYLEVEL));
     }
 
-
     /**
      * Synchronously get the <i>CurrentZoneSensitivityLevel</i> attribute [attribute ID <b>19</b>].
      * <p>
@@ -461,11 +434,8 @@ public class ZclIasZoneCluster extends ZclCluster {
      * @return the {@link Integer} attribute value, or null on error
      */
     public Integer getCurrentZoneSensitivityLevel(final long refreshPeriod) {
-        if(refreshPeriod > 0 && attributes.get(ATTR_CURRENTZONESENSITIVITYLEVEL).getLastReportTime() != null) {
-            long refreshTime = Calendar.getInstance().getTimeInMillis() - refreshPeriod;
-            if(attributes.get(ATTR_CURRENTZONESENSITIVITYLEVEL).getLastReportTime().getTimeInMillis() < refreshTime) {
-                return (Integer) attributes.get(ATTR_CURRENTZONESENSITIVITYLEVEL).getLastValue();
-            }
+        if (attributes.get(ATTR_CURRENTZONESENSITIVITYLEVEL).isLastValueCurrent(refreshPeriod)) {
+            return (Integer) attributes.get(ATTR_CURRENTZONESENSITIVITYLEVEL).getLastValue();
         }
 
         return (Integer) readSync(attributes.get(ATTR_CURRENTZONESENSITIVITYLEVEL));
